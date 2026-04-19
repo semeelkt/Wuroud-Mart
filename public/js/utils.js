@@ -187,8 +187,19 @@ function formatCurrency(price) {
 
 function getImageUrl(path) {
   if (!path) return "https://via.placeholder.com/300?text=No+Image";
-  if (path.startsWith("http")) return path;
-  return `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(path)}?alt=media`;
+
+  // If it's already a base64 string (starts with data:)
+  if (path.startsWith("data:")) {
+    return path;
+  }
+
+  // If it's a Firebase Storage path
+  if (path.startsWith("http")) {
+    return path;
+  }
+
+  // Default placeholder
+  return "https://via.placeholder.com/300?text=No+Image";
 }
 
 function showNotification(message, type = "success") {

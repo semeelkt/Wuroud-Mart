@@ -258,25 +258,34 @@ async function saveProduct() {
       description: document.getElementById("productDescription").value
     };
 
-    // Handle image upload
+    // Handle image upload - Convert to base64 and store in Firestore
     const imageFile = document.getElementById("productImage").files[0];
     if (imageFile) {
-      const imagePath = `products/${Date.now()}_${imageFile.name}`;
-      const uploadTask = storage.ref(imagePath).put(imageFile);
+      // Check file size (max 5MB for Firestore)
+      if (imageFile.size > 5 * 1024 * 1024) {
+        showNotification("Image must be less than 5MB", "error");
+        hideLoader();
+        return;
+      }
 
-      uploadTask.on(
-        "state_changed",
-        null,
-        (error) => {
-          console.error("Image upload error:", error);
-          throw error;
-        },
-        async () => {
-          const imageURL = await storage.ref(imagePath).getDownloadURL();
-          productData.imageURL = imagePath;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          // Store base64 image directly in Firestore
+          productData.imageURL = e.target.result; // base64 string
           await saveProductToFirestore(productData);
+        } catch (error) {
+          console.error("Error saving product:", error);
+          showNotification("Error saving product", "error");
+          hideLoader();
         }
-      );
+      };
+      reader.onerror = (error) => {
+        console.error("File read error:", error);
+        showNotification("Error reading file", "error");
+        hideLoader();
+      };
+      reader.readAsDataURL(imageFile);
     } else {
       await saveProductToFirestore(productData);
     }
@@ -425,23 +434,34 @@ async function saveOffer() {
       validUntil: new Date(document.getElementById("offerValidUntil").value).toISOString()
     };
 
+    // Handle image upload - Convert to base64 and store in Firestore
     const imageFile = document.getElementById("offerImage").files[0];
     if (imageFile) {
-      const imagePath = `offers/${Date.now()}_${imageFile.name}`;
-      const uploadTask = storage.ref(imagePath).put(imageFile);
+      // Check file size (max 5MB for Firestore)
+      if (imageFile.size > 5 * 1024 * 1024) {
+        showNotification("Image must be less than 5MB", "error");
+        hideLoader();
+        return;
+      }
 
-      uploadTask.on(
-        "state_changed",
-        null,
-        (error) => {
-          console.error("Image upload error:", error);
-          throw error;
-        },
-        async () => {
-          offerData.imageURL = imagePath;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          // Store base64 image directly in Firestore
+          offerData.imageURL = e.target.result; // base64 string
           await saveOfferToFirestore(offerData);
+        } catch (error) {
+          console.error("Error saving offer:", error);
+          showNotification("Error saving offer", "error");
+          hideLoader();
         }
-      );
+      };
+      reader.onerror = (error) => {
+        console.error("File read error:", error);
+        showNotification("Error reading file", "error");
+        hideLoader();
+      };
+      reader.readAsDataURL(imageFile);
     } else {
       await saveOfferToFirestore(offerData);
     }
