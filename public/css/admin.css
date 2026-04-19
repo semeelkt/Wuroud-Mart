@@ -1,17 +1,41 @@
 /**
- * Admin Panel Styles
+ * Admin Panel Styles - PREMIUM
  */
 
 /* ============================================
-   Admin Layout
+   Admin Layout - Premium
    ============================================ */
 .admin-login {
   display: none;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
   padding: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-login::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(212, 165, 116, 0.15), transparent);
+  border-radius: 50%;
+  top: -200px;
+  right: -200px;
+}
+
+.admin-login::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(212, 165, 116, 0.1), transparent);
+  border-radius: 50%;
+  bottom: -150px;
+  left: -100px;
 }
 
 .admin-login.active {
@@ -20,14 +44,17 @@
 
 .login-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
 }
 
 .login-card {
   background: var(--bg-white);
-  border-radius: var(--radius);
-  padding: 2rem;
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 165, 116, 0.2);
 }
 
 .admin-dashboard {
@@ -41,16 +68,17 @@
 }
 
 /* ============================================
-   Admin Header
+   Admin Header - Premium
    ============================================ */
 .admin-header {
-  background: var(--text-primary);
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
   color: var(--bg-white);
-  padding: 1rem;
+  padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-bottom: 2px solid var(--accent-color);
 }
 
 .admin-header .logo {
@@ -68,11 +96,11 @@
 }
 
 .admin-sidebar {
-  background: var(--bg-light);
-  border-right: 1px solid var(--border-color);
+  background: linear-gradient(180deg, var(--bg-light), var(--bg-white));
+  border-right: 1px solid rgba(212, 165, 116, 0.2);
   padding: 1rem 0;
   overflow-y: auto;
-  min-width: 200px;
+  min-width: 220px;
 }
 
 .admin-sidebar nav {
@@ -84,24 +112,29 @@
 .nav-btn {
   background: none;
   border: none;
-  padding: 1rem;
+  padding: 1.1rem 1.5rem;
   text-align: left;
   cursor: pointer;
   color: var(--text-secondary);
   font-weight: 600;
   transition: var(--transition);
   border-left: 3px solid transparent;
+  font-size: 0.95rem;
 }
 
 .nav-btn:hover {
-  background: rgba(37, 99, 235, 0.1);
-  color: var(--primary-color);
+  background: linear-gradient(90deg, rgba(212, 165, 116, 0.1), transparent);
+  color: var(--accent-color);
+  border-left-color: var(--accent-color);
+  padding-left: 2rem;
 }
 
 .nav-btn.active {
-  background: rgba(37, 99, 235, 0.15);
-  color: var(--primary-color);
-  border-left-color: var(--primary-color);
+  background: linear-gradient(90deg, rgba(212, 165, 116, 0.15), transparent);
+  color: var(--accent-color);
+  border-left-color: var(--accent-color);
+  padding-left: 2rem;
+  font-weight: 700;
 }
 
 .admin-content {
@@ -147,17 +180,25 @@
   grid-template-columns: 100px 1fr auto;
   gap: 1.5rem;
   align-items: start;
-  background: var(--bg-light);
+  background: linear-gradient(135deg, var(--bg-light), var(--bg-white));
   padding: 1.5rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(212, 165, 116, 0.15);
+  transition: var(--transition);
+}
+
+.product-item:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(212, 165, 116, 0.3);
+  transform: translateY(-2px);
 }
 
 .product-item-image {
   width: 100px;
   height: 100px;
   object-fit: cover;
-  border-radius: var(--radius);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
 }
 
 .product-item-info h3 {
@@ -236,15 +277,21 @@
 }
 
 .inquiry-item {
-  background: var(--bg-light);
-  padding: 1rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--border-color);
-  border-left: 4px solid var(--primary-color);
+  background: linear-gradient(135deg, var(--bg-light), var(--bg-white));
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-color);
+  border-left: 5px solid var(--accent-color);
+  transition: var(--transition);
+}
+
+.inquiry-item:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateX(4px);
 }
 
 .inquiry-item.viewed {
-  opacity: 0.7;
+  opacity: 0.8;
   border-left-color: var(--success-color);
 }
 
@@ -257,6 +304,7 @@
 
 .inquiry-header h4 {
   margin: 0;
+  color: var(--text-primary);
 }
 
 .inquiry-meta {
@@ -266,22 +314,24 @@
 }
 
 .inquiry-product {
-  background: rgba(37, 99, 235, 0.1);
-  color: var(--primary-color);
-  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, rgba(212, 165, 116, 0.2), rgba(212, 165, 116, 0.05));
+  color: var(--accent-color);
+  padding: 0.35rem 1rem;
   border-radius: 20px;
   display: inline-block;
   font-size: 0.85rem;
   font-weight: 600;
   margin: 0.5rem 0;
+  border: 1px solid rgba(212, 165, 116, 0.3);
 }
 
 .inquiry-message {
   margin: 0.75rem 0;
-  padding: 0.75rem;
+  padding: 1rem;
   background: var(--bg-white);
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 0.95rem;
+  border-left: 3px solid var(--accent-color);
 }
 
 .inquiry-actions {
