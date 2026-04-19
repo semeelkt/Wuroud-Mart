@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Premium digital catalog - View our products and contact us via WhatsApp">
+  <title>Wuroud Mart - Premium Products</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <style>
+    @media (min-width: 640px) {
+      .hero {
+        padding: 5rem 1rem;
+      }
+
+      .hero h1 {
+        font-size: 3rem;
+      }
+
+      .offers-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Header -->
+  <header>
+    <nav>
+      <div class="logo">🛍️ Wuroud Mart</div>
+      <button class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="#home" onclick="closeMenu()">Home</a></li>
+        <li><a href="products.html" onclick="closeMenu()">Products</a></li>
+        <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
+        <li><a href="admin.html" onclick="closeMenu()">Admin</a></li>
+      </ul>
+      <select class="language-switcher" id="languageSwitcher">
+        <option value="en">English (EN)</option>
+        <option value="ml">മലയാളം (ML)</option>
+      </select>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="container">
+      <h1>Wuroud Mart</h1>
+      <p>Premium Products Delivered to Your Doorstep</p>
+      <div class="hero-buttons">
+        <a href="products.html" class="btn btn-secondary">📦 View Products</a>
+        <button class="btn btn-primary" onclick="contactViaWhatsApp()">💬 Contact via WhatsApp</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Today's Offers Section -->
+  <section id="offers">
+    <div class="container">
+      <div class="section-title">
+        <h2>🎉 Today's Offers</h2>
+      </div>
+      <div class="grid offers-grid" id="offersContainer">
+        <div class="card" style="text-align: center; padding: 2rem;">
+          <p style="color: var(--text-secondary);">Loading offers...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products Section -->
+  <section id="featured" style="background: var(--bg-light);">
+    <div class="container">
+      <div class="section-title">
+        <h2>⭐ Featured Products</h2>
+      </div>
+      <div class="grid" id="featuredProducts">
+        <div class="card" style="text-align: center; padding: 2rem;">
+          <p style="color: var(--text-secondary);">Loading products...</p>
+        </div>
+      </div>
+      <div class="text-center" style="margin-top: 2rem;">
+        <a href="products.html" class="btn btn-primary">View All Products →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-title">
+        <h2>📞 Get in Touch</h2>
+        <p>We're here to help! Choose your preferred contact method</p>
+      </div>
+
+      <div class="grid grid-2">
+        <!-- Contact Info Cards -->
+        <div class="card text-center">
+          <h3>☎️ Call Us</h3>
+          <p style="margin: 1rem 0;">Available during opening hours</p>
+          <a href="tel:+1234567890" class="btn btn-primary btn-block">Call Now</a>
+        </div>
+
+        <div class="card text-center">
+          <h3>💬 WhatsApp</h3>
+          <p style="margin: 1rem 0;">Quick response guaranteed</p>
+          <button class="btn btn-success btn-block" onclick="contactViaWhatsApp()">Message on WhatsApp</button>
+        </div>
+      </div>
+
+      <!-- Opening Hours -->
+      <div class="card mt-4">
+        <h3>⏰ Opening Hours</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+          <div>
+            <p><strong>Monday - Friday:</strong> 09:00 - 22:00</p>
+            <p><strong>Saturday:</strong> 10:00 - 23:00</p>
+          </div>
+          <div>
+            <p><strong>Sunday:</strong> 10:00 - 21:00</p>
+            <p><strong>Holiday:</strong> Closed</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map Section -->
+      <div class="card mt-4">
+        <h3>📍 Visit Our Shop</h3>
+        <iframe width="100%" height="300" style="border: none; border-radius: var(--radius); margin-top: 1rem;" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.8354345099136!2d151.19290772342656!3d-33.88261897323157!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12a1e3b5c5b5b5%3A0x5c5b5b5b5b5b5b5b!2sWuroud%20Mart!5e0!3m2!1sen!2sin!4v1234567890" allowfullscreen="" loading="lazy"></iframe>
+      </div>
+
+      <!-- General Inquiry Form -->
+      <div class="card mt-4">
+        <h3>✉️ Send Us a Message</h3>
+        <form id="inquiryForm" style="margin-top: 1rem;">
+          <div class="form-group">
+            <label for="contactName">Your Name</label>
+            <input type="text" id="contactName" name="name" required>
+          </div>
+          <div class="form-group">
+            <label for="contactPhone">Phone Number</label>
+            <input type="tel" id="contactPhone" name="phone" required>
+          </div>
+          <div class="form-group">
+            <label for="contactMessage">Message</label>
+            <textarea id="contactMessage" name="message" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background: var(--text-primary); color: var(--bg-white); padding: 2rem 1rem; text-align: center; margin-top: 2rem;">
+    <div class="container">
+      <p>&copy; 2024 Wuroud Mart. All rights reserved.</p>
+      <p style="margin-top: 1rem; font-size: 0.875rem; color: rgba(255,255,255,0.8);">Developed with ❤️ for your convenience</p>
+    </div>
+  </footer>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- Service Worker Registration for PWA -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("sw.js")
+        .then((registration) => {
+          console.log("Service Worker registered successfully:", registration);
+        })
+        .catch((error) => {
+          console.log("Service Worker registration failed:", error);
+        });
+    }
+  </script>
+</body>
+</html>

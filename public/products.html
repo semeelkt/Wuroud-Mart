@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse all our premium products">
+  <title>Products - Wuroud Mart</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation Header -->
+  <header>
+    <nav>
+      <div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;">🛍️ Wuroud Mart</a></div>
+      <button class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="index.html" onclick="closeMenu()">Home</a></li>
+        <li><a href="#products" onclick="closeMenu()">Products</a></li>
+        <li><a href="index.html#contact" onclick="closeMenu()">Contact</a></li>
+        <li><a href="admin.html" onclick="closeMenu()">Admin</a></li>
+      </ul>
+      <select class="language-switcher" id="languageSwitcher">
+        <option value="en">English (EN)</option>
+        <option value="ml">മലയാളം (ML)</option>
+      </select>
+    </nav>
+  </header>
+
+  <!-- Page Title -->
+  <section style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 2rem 1rem; text-align: center;">
+    <div class="container">
+      <h1>📦 All Products</h1>
+      <p>Explore our complete range of premium products</p>
+    </div>
+  </section>
+
+  <!-- Filters Section -->
+  <section style="background: var(--bg-light); padding: 1.5rem 1rem; sticky: top: 70px; z-index: 50;">
+    <div class="container">
+      <div class="filters">
+        <div class="search-box">
+          <input type="text" id="searchBox" placeholder="Search products..." style="width: 100%; padding-left: 2.5rem;">
+        </div>
+        <div class="filter-group">
+          <select id="categoryFilter" style="padding: 0.5rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+            <option value="">All Categories</option>
+          </select>
+          <select id="sortBy" style="padding: 0.5rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+            <option value="newest">Newest First</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="name">Name: A to Z</option>
+          </select>
+          <button class="btn btn-outline btn-small" onclick="clearFilters()">Clear Filters</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Grid -->
+  <section id="products" style="padding: 2rem 1rem;">
+    <div class="container">
+      <div id="noResults" class="text-center" style="display: none; padding: 3rem;">
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">No products found. Try adjusting your filters.</p>
+      </div>
+      <div class="grid grid-2" id="productsContainer">
+        <div class="card" style="text-align: center; padding: 2rem; grid-column: 1 / -1;">
+          <p style="color: var(--text-secondary);">Loading products...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background: var(--text-primary); color: var(--bg-white); padding: 2rem 1rem; text-align: center; margin-top: 2rem;">
+    <div class="container">
+      <p>&copy; 2024 Wuroud Mart. All rights reserved.</p>
+      <p style="margin-top: 1rem; font-size: 0.875rem; color: rgba(255,255,255,0.8);">Developed with ❤️ for your convenience</p>
+    </div>
+  </footer>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/products.js"></script>
+</body>
+</html>

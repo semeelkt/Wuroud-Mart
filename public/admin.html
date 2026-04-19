@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Admin Panel - Manage Products & Inquiries">
+  <title>Admin Panel - Wuroud Mart</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <!-- Login Section -->
+  <div id="loginSection" class="admin-login active">
+    <div class="login-container">
+      <div class="login-card">
+        <h1 style="text-align: center; margin-bottom: 2rem;">🛍️ Wuroud Mart Admin</h1>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+        <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+          Use your Firebase Auth credentials to login
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="adminDashboard" class="admin-dashboard">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="logo" style="margin: 0;">🛍️ Wuroud Mart Admin</div>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </header>
+
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <nav>
+          <button class="nav-btn active" data-tab="products">📦 Products</button>
+          <button class="nav-btn" data-tab="offers">🎉 Offers</button>
+          <button class="nav-btn" data-tab="inquiries">💬 Inquiries</button>
+          <button class="nav-btn" data-tab="settings">⚙️ Settings</button>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <!-- Products Tab -->
+        <div class="tab-content active" id="products-tab">
+          <div class="tab-header">
+            <h2>📦 Manage Products</h2>
+            <button class="btn btn-primary" onclick="openAddProductForm()">+ Add Product</button>
+          </div>
+
+          <div class="products-list" id="productsList">
+            <div style="text-align: center; padding: 2rem;">Loading products...</div>
+          </div>
+        </div>
+
+        <!-- Offers Tab -->
+        <div class="tab-content" id="offers-tab">
+          <div class="tab-header">
+            <h2>🎉 Manage Offers</h2>
+            <button class="btn btn-primary" onclick="openAddOfferForm()">+ Add Offer</button>
+          </div>
+
+          <div class="offers-list" id="offersList">
+            <div style="text-align: center; padding: 2rem;">Loading offers...</div>
+          </div>
+        </div>
+
+        <!-- Inquiries Tab -->
+        <div class="tab-content" id="inquiries-tab">
+          <div class="tab-header">
+            <h2>💬 Customer Inquiries</h2>
+          </div>
+
+          <div class="inquiries-list" id="inquiriesList">
+            <div style="text-align: center; padding: 2rem;">Loading inquiries...</div>
+          </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings-tab">
+          <div class="tab-header">
+            <h2>⚙️ Shop Settings</h2>
+          </div>
+
+          <div class="card">
+            <form id="settingsForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="shopName">Shop Name</label>
+                  <input type="text" id="shopName" required>
+                </div>
+                <div class="form-group">
+                  <label for="shopPhone">Phone Number</label>
+                  <input type="tel" id="shopPhone" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="shopWhatsApp">WhatsApp Number</label>
+                  <input type="tel" id="shopWhatsApp" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="shopDescription">Shop Description</label>
+                <textarea id="shopDescription"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Product Form Modal -->
+  <div id="productFormModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="productFormTitle">Add Product</h2>
+        <button class="close-btn" onclick="closeProductForm()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm">
+          <div class="form-group">
+            <label for="productName">Product Name</label>
+            <input type="text" id="productName" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productCategory">Category</label>
+              <select id="productCategory" required>
+                <option value="">Select Category</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="productPrice">Price</label>
+              <input type="number" id="productPrice" step="0.01">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productStock">Stock</label>
+              <input type="number" id="productStock" value="0" required>
+            </div>
+            <div class="form-group">
+              <label for="productImage">Product Image</label>
+              <input type="file" id="productImage" accept="image/*">
+            </div>
+          </div>
+
+          <div id="imagePreview" style="margin: 1rem 0; display: none;">
+            <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: var(--radius);">
+          </div>
+
+          <div class="form-group">
+            <label for="productDescription">Description</label>
+            <textarea id="productDescription"></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeProductForm()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offer Form Modal -->
+  <div id="offerFormModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="offerFormTitle">Add Offer</h2>
+        <button class="close-btn" onclick="closeOfferForm()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="offerForm">
+          <div class="form-group">
+            <label for="offerTitle">Offer Title</label>
+            <input type="text" id="offerTitle" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="offerDiscount">Discount (%)</label>
+              <input type="number" id="offerDiscount" min="0" max="100" required>
+            </div>
+            <div class="form-group">
+              <label for="offerValidUntil">Valid Until</label>
+              <input type="date" id="offerValidUntil" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="offerDescription">Description</label>
+            <textarea id="offerDescription"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="offerImage">Offer Image</label>
+            <input type="file" id="offerImage" accept="image/*">
+          </div>
+
+          <div id="offerImagePreview" style="margin: 1rem 0; display: none;">
+            <img id="offerPreviewImg" style="max-width: 100%; max-height: 200px; border-radius: var(--radius);">
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeOfferForm()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Offer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
