@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Admin Panel - Manage Products & Inquiries">
   <title>Admin Panel - Wuroud Mart</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/admin.css">
 </head>
@@ -13,7 +14,7 @@
   <div id="loginSection" class="admin-login active">
     <div class="login-container">
       <div class="login-card">
-        <h1 style="text-align: center; margin-bottom: 2rem;">🛍️ Wuroud Mart Admin</h1>
+        <h1 style="text-align: center; margin-bottom: 2rem;"><i class="fas fa-shopping-bag"></i> Wuroud Mart Admin</h1>
         <form id="loginForm">
           <div class="form-group">
             <label for="loginEmail">Email</label>
@@ -36,7 +37,7 @@
   <div id="adminDashboard" class="admin-dashboard">
     <!-- Header -->
     <header class="admin-header">
-      <div class="logo" style="margin: 0;">🛍️ Wuroud Mart Admin</div>
+      <div class="logo" style="margin: 0;"><i class="fas fa-shopping-bag"></i> Wuroud Mart Admin</div>
       <button class="btn btn-danger" onclick="logout()">Logout</button>
     </header>
 
@@ -44,10 +45,10 @@
       <!-- Sidebar -->
       <aside class="admin-sidebar">
         <nav>
-          <button class="nav-btn active" data-tab="products">📦 Products</button>
-          <button class="nav-btn" data-tab="offers">🎉 Offers</button>
-          <button class="nav-btn" data-tab="inquiries">💬 Inquiries</button>
-          <button class="nav-btn" data-tab="settings">⚙️ Settings</button>
+          <button class="nav-btn active" data-tab="products"><i class="fas fa-box"></i> Products</button>
+          <button class="nav-btn" data-tab="offers"><i class="fas fa-gift"></i> Offers</button>
+          <button class="nav-btn" data-tab="inquiries"><i class="fas fa-comments"></i> Inquiries</button>
+          <button class="nav-btn" data-tab="settings"><i class="fas fa-sliders-h"></i> Settings</button>
         </nav>
       </aside>
 
@@ -56,8 +57,8 @@
         <!-- Products Tab -->
         <div class="tab-content active" id="products-tab">
           <div class="tab-header">
-            <h2>📦 Manage Products</h2>
-            <button class="btn btn-primary" onclick="openAddProductForm()">+ Add Product</button>
+            <h2><i class="fas fa-box"></i> Manage Products</h2>
+            <button class="btn btn-primary" onclick="openAddProductForm()"><i class="fas fa-plus"></i> Add Product</button>
           </div>
 
           <div class="products-list" id="productsList">
@@ -68,8 +69,8 @@
         <!-- Offers Tab -->
         <div class="tab-content" id="offers-tab">
           <div class="tab-header">
-            <h2>🎉 Manage Offers</h2>
-            <button class="btn btn-primary" onclick="openAddOfferForm()">+ Add Offer</button>
+            <h2><i class="fas fa-gift"></i> Manage Offers</h2>
+            <button class="btn btn-primary" onclick="openAddOfferForm()"><i class="fas fa-plus"></i> Add Offer</button>
           </div>
 
           <div class="offers-list" id="offersList">
@@ -80,7 +81,7 @@
         <!-- Inquiries Tab -->
         <div class="tab-content" id="inquiries-tab">
           <div class="tab-header">
-            <h2>💬 Customer Inquiries</h2>
+            <h2><i class="fas fa-comments"></i> Customer Inquiries</h2>
           </div>
 
           <div class="inquiries-list" id="inquiriesList">
@@ -91,7 +92,7 @@
         <!-- Settings Tab -->
         <div class="tab-content" id="settings-tab">
           <div class="tab-header">
-            <h2>⚙️ Shop Settings</h2>
+            <h2><i class="fas fa-sliders-h"></i> Shop Settings</h2>
           </div>
 
           <div class="card">
@@ -128,8 +129,8 @@
   <div id="productFormModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="productFormTitle">Add Product</h2>
-        <button class="close-btn" onclick="closeProductForm()">✕</button>
+        <h2 id="productFormTitle"><i class="fas fa-box"></i> Add Product</h2>
+        <button class="close-btn" onclick="closeProductForm()"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
         <form id="productForm">
@@ -184,8 +185,8 @@
   <div id="offerFormModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="offerFormTitle">Add Offer</h2>
-        <button class="close-btn" onclick="closeOfferForm()">✕</button>
+        <h2 id="offerFormTitle"><i class="fas fa-gift"></i> Add Offer</h2>
+        <button class="close-btn" onclick="closeOfferForm()"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
         <form id="offerForm">

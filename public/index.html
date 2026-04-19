@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Premium digital catalog - View our products and contact us via WhatsApp">
   <title>Wuroud Mart - Premium Products</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2563eb">
@@ -28,17 +29,17 @@
   <!-- Navigation Header -->
   <header>
     <nav>
-      <div class="logo">🛍️ Wuroud Mart</div>
+      <div class="logo"><i class="fas fa-shopping-bag"></i> Wuroud Mart</div>
       <button class="hamburger" id="hamburger">
         <span></span>
         <span></span>
         <span></span>
       </button>
       <ul class="nav-menu" id="navMenu">
-        <li><a href="#home" onclick="closeMenu()">Home</a></li>
-        <li><a href="products.html" onclick="closeMenu()">Products</a></li>
-        <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
-        <li><a href="admin.html" onclick="closeMenu()">Admin</a></li>
+        <li><a href="#home" onclick="closeMenu()"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="products.html" onclick="closeMenu()"><i class="fas fa-box"></i> Products</a></li>
+        <li><a href="#contact" onclick="closeMenu()"><i class="fas fa-phone"></i> Contact</a></li>
+        <li><a href="admin.html" onclick="closeMenu()"><i class="fas fa-cog"></i> Admin</a></li>
       </ul>
     </nav>
   </header>
@@ -49,8 +50,8 @@
       <h1>Wuroud Mart</h1>
       <p>Premium Products Delivered to Your Doorstep</p>
       <div class="hero-buttons">
-        <a href="products.html" class="btn btn-secondary">📦 View Products</a>
-        <button class="btn btn-primary" onclick="contactViaWhatsApp()">💬 Contact via WhatsApp</button>
+        <a href="products.html" class="btn btn-secondary"><i class="fas fa-shopping-cart"></i> View Products</a>
+        <button class="btn btn-primary" onclick="contactViaWhatsApp()"><i class="fab fa-whatsapp"></i> Contact via WhatsApp</button>
       </div>
     </div>
   </section>
@@ -59,7 +60,7 @@
   <section id="offers">
     <div class="container">
       <div class="section-title">
-        <h2>🎉 Today's Offers</h2>
+        <h2><i class="fas fa-tag"></i> Today's Offers</h2>
       </div>
       <div class="grid offers-grid" id="offersContainer">
         <div class="card" style="text-align: center; padding: 2rem;">
@@ -73,7 +74,7 @@
   <section id="featured" style="background: var(--bg-light);">
     <div class="container">
       <div class="section-title">
-        <h2>⭐ Featured Products</h2>
+        <h2><i class="fas fa-star"></i> Featured Products</h2>
       </div>
       <div class="grid" id="featuredProducts">
         <div class="card" style="text-align: center; padding: 2rem;">
@@ -81,7 +82,7 @@
         </div>
       </div>
       <div class="text-center" style="margin-top: 2rem;">
-        <a href="products.html" class="btn btn-primary">View All Products →</a>
+        <a href="products.html" class="btn btn-primary"><i class="fas fa-arrow-right"></i> View All Products</a>
       </div>
     </div>
   </section>
@@ -90,28 +91,28 @@
   <section id="contact">
     <div class="container">
       <div class="section-title">
-        <h2>📞 Get in Touch</h2>
+        <h2><i class="fas fa-envelope"></i> Get in Touch</h2>
         <p>We're here to help! Choose your preferred contact method</p>
       </div>
 
       <div class="grid grid-2">
         <!-- Contact Info Cards -->
         <div class="card text-center">
-          <h3>☎️ Call Us</h3>
+          <h3><i class="fas fa-phone-alt"></i> Call Us</h3>
           <p style="margin: 1rem 0;">Available during opening hours</p>
-          <a href="tel:+1234567890" class="btn btn-primary btn-block">Call Now</a>
+          <a href="tel:+1234567890" class="btn btn-primary btn-block"><i class="fas fa-phone"></i> Call Now</a>
         </div>
 
         <div class="card text-center">
-          <h3>💬 WhatsApp</h3>
+          <h3><i class="fab fa-whatsapp"></i> WhatsApp</h3>
           <p style="margin: 1rem 0;">Quick response guaranteed</p>
-          <button class="btn btn-success btn-block" onclick="contactViaWhatsApp()">Message on WhatsApp</button>
+          <button class="btn btn-success btn-block" onclick="contactViaWhatsApp()"><i class="fab fa-whatsapp"></i> Message on WhatsApp</button>
         </div>
       </div>
 
       <!-- Opening Hours -->
       <div class="card mt-4">
-        <h3>⏰ Opening Hours</h3>
+        <h3><i class="fas fa-clock"></i> Opening Hours</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
           <div>
             <p><strong>Monday - Friday:</strong> 09:00 - 22:00</p>
@@ -126,13 +127,13 @@
 
       <!-- Map Section -->
       <div class="card mt-4">
-        <h3>📍 Visit Our Shop</h3>
+        <h3><i class="fas fa-map-marker-alt"></i> Visit Our Shop</h3>
         <iframe width="100%" height="300" style="border: none; border-radius: var(--radius); margin-top: 1rem;" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.8354345099136!2d151.19290772342656!3d-33.88261897323157!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12a1e3b5c5b5b5%3A0x5c5b5b5b5b5b5b5b!2sWuroud%20Mart!5e0!3m2!1sen!2sin!4v1234567890" allowfullscreen="" loading="lazy"></iframe>
       </div>
 
       <!-- General Inquiry Form -->
       <div class="card mt-4">
-        <h3>✉️ Send Us a Message</h3>
+        <h3><i class="fas fa-paper-plane"></i> Send Us a Message</h3>
         <form id="inquiryForm" style="margin-top: 1rem;">
           <div class="form-group">
             <label for="contactName">Your Name</label>
