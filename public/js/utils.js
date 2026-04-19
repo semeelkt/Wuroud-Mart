@@ -3,32 +3,47 @@
  */
 
 // ============================================
-// Firebase Initialization (Compat Version)
+// Firebase Initialization
 // ============================================
 let db, storage, auth;
 
-async function initializeFirebase() {
-  try {
-    // Check if Firebase SDK is loaded
+function initializeFirebase() {
+  return new Promise((resolve, reject) => {
+    // Check if Firebase is loaded
     if (typeof firebase === 'undefined') {
-      console.error("❌ Firebase SDK not loaded. Ensure script tags in HTML are correct.");
-      return false;
+      console.error("❌ Firebase SDK not loaded");
+      reject("Firebase not available");
+      return;
     }
 
-    // Initialize Firebase using compat version
-    firebase.initializeApp(firebaseConfig);
+    try {
+      // Check if already initialized
+      if (firebase.apps.length > 0) {
+        console.log("✅ Firebase already initialized");
+        db = firebase.firestore();
+        storage = firebase.storage();
+        auth = firebase.auth();
+        resolve(true);
+        return;
+      }
 
-    // Get Firestore, Storage, and Auth instances
-    db = firebase.firestore();
-    storage = firebase.storage();
-    auth = firebase.auth();
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      storage = firebase.storage();
+      auth = firebase.auth();
 
-    console.log("✅ Firebase initialized successfully");
-    return true;
-  } catch (error) {
-    console.error("❌ Firebase initialization error:", error);
-    return false;
-  }
+      console.log("✅ Firebase initialized successfully", {
+        auth: !!auth,
+        db: !!db,
+        storage: !!storage
+      });
+      resolve(true);
+    } catch (error) {
+      console.error("❌ Firebase initialization error:", error);
+      reject(error);
+    }
+  });
 }
 
 // ============================================

@@ -10,9 +10,19 @@ let editingOfferId = null;
 // Initialize
 // ============================================
 document.addEventListener("DOMContentLoaded", async () => {
-  await initializeFirebase();
-  checkAuthStatus();
-  setupEventListeners();
+  try {
+    const firebaseReady = await initializeFirebase();
+    if (firebaseReady) {
+      checkAuthStatus();
+      setupEventListeners();
+    } else {
+      console.error("Failed to initialize Firebase");
+      alert("Firebase initialization failed. Please refresh.");
+    }
+  } catch (error) {
+    console.error("Initialization error:", error);
+    alert("Error initializing app: " + error.message);
+  }
 });
 
 // ============================================

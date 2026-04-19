@@ -6,11 +6,17 @@
 // Initialize
 // ============================================
 document.addEventListener("DOMContentLoaded", async () => {
-  await initializeFirebase();
-  setupNavigationMenu();
-  loadOffers();
-  loadFeaturedProducts();
-  setupInquiryForm();
+  try {
+    const firebaseReady = await initializeFirebase();
+    if (firebaseReady) {
+      setupNavigationMenu();
+      loadOffers();
+      loadFeaturedProducts();
+      setupInquiryForm();
+    }
+  } catch (error) {
+    console.error("Initialization error:", error);
+  }
 });
 
 // ============================================

@@ -9,11 +9,17 @@ let filteredProducts = [];
 // Initialize
 // ============================================
 document.addEventListener("DOMContentLoaded", async () => {
-  await initializeFirebase();
-  setupNavigationMenu();
-  await loadAllProducts();
-  setupFilters();
-  displayProducts(allProducts);
+  try {
+    const firebaseReady = await initializeFirebase();
+    if (firebaseReady) {
+      setupNavigationMenu();
+      await loadAllProducts();
+      setupFilters();
+      displayProducts(allProducts);
+    }
+  } catch (error) {
+    console.error("Initialization error:", error);
+  }
 });
 
 // ============================================
