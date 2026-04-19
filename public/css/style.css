@@ -135,18 +135,25 @@ nav {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -1px;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.logo:hover {
+  filter: brightness(1.2);
 }
 
 .nav-menu {
   display: none;
   flex-direction: column;
   position: absolute;
-  top: 70px;
+  top: 65px;
   left: 0;
   right: 0;
   background: var(--bg-white);
   border-bottom: 1px solid var(--border-color);
   list-style: none;
+  box-shadow: var(--shadow-lg);
 }
 
 .nav-menu.active {
@@ -157,18 +164,26 @@ nav {
   border-bottom: 1px solid var(--border-color);
 }
 
+.nav-menu li:last-child {
+  border-bottom: none;
+}
+
 .nav-menu a {
   display: block;
-  padding: 1rem 1.5rem;
+  padding: 1.1rem 1.5rem;
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
   transition: var(--transition);
+  letter-spacing: 0.3px;
+  font-size: 0.95rem;
+  text-transform: uppercase;
 }
 
 .nav-menu a:hover {
   background: linear-gradient(90deg, rgba(212, 165, 116, 0.1), transparent);
   color: var(--accent-color);
   padding-left: 2rem;
+  border-left: 3px solid var(--accent-color);
 }
 
 .hamburger {
@@ -177,31 +192,21 @@ nav {
   cursor: pointer;
   background: none;
   border: none;
+  gap: 6px;
+  padding: 8px;
 }
 
 .hamburger span {
-  width: 25px;
+  width: 26px;
   height: 2.5px;
   background: var(--accent-color);
-  margin: 6px 0;
   transition: var(--transition);
   border-radius: 2px;
+  display: block;
 }
 
-.language-switcher {
-  background: rgba(212, 165, 116, 0.15);
-  border: 1.5px solid var(--accent-color);
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  margin-left: 1rem;
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--accent-color);
-  transition: var(--transition);
-}
-
-.language-switcher:hover {
-  background: rgba(212, 165, 116, 0.25);
+.hamburger:hover span {
+  background: var(--accent-light);
 }
 
 /* ============================================
@@ -938,17 +943,36 @@ footer p {
     position: static;
     flex-direction: row;
     border: none;
+    box-shadow: none;
+    background: transparent;
+    gap: 0;
   }
 
   .nav-menu li {
     border: none;
-    margin-left: 2rem;
+  }
+
+  .nav-menu li:not(:last-child) {
+    margin-right: 0.5rem;
   }
 
   .nav-menu a {
-    padding: 0;
+    padding: 0.8rem 1.3rem;
     color: var(--bg-white);
-    font-weight: 500;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-menu a:hover {
+    background: rgba(212, 165, 116, 0.2);
+    color: var(--accent-light);
+    transform: translateY(-2px);
+    padding-left: 1.3rem;
+    border-left: none;
   }
 
   .hamburger {
@@ -985,6 +1009,14 @@ footer p {
 
   .grid-3 {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  nav {
+    padding: 1.25rem 2rem;
+  }
+
+  .nav-menu a {
+    padding: 0.9rem 1.5rem;
   }
 }
 

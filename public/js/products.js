@@ -11,7 +11,6 @@ let filteredProducts = [];
 document.addEventListener("DOMContentLoaded", async () => {
   await initializeFirebase();
   setupNavigationMenu();
-  setupLanguageSwitcher();
   await loadAllProducts();
   setupFilters();
   displayProducts(allProducts);
@@ -45,17 +44,9 @@ function closeMenu() {
 }
 
 // ============================================
-// Language Switcher
+// Language Switcher - REMOVED (Feature removed)
 // ============================================
-function setupLanguageSwitcher() {
-  const switcher = document.getElementById("languageSwitcher");
-  if (switcher) {
-    switcher.value = currentLanguage;
-    switcher.addEventListener("change", (e) => {
-      setLanguage(e.target.value);
-    });
-  }
-}
+// Multi-language support has been disabled
 
 // ============================================
 // Load All Products
