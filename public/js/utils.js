@@ -3,28 +3,31 @@
  */
 
 // ============================================
-// Firebase Initialization
+// Firebase Initialization (Compat Version)
 // ============================================
 let db, storage, auth;
 
 async function initializeFirebase() {
   try {
-    // Import Firebase modules from CDN (loaded in HTML)
+    // Check if Firebase SDK is loaded
     if (typeof firebase === 'undefined') {
-      console.error("Firebase SDK not loaded. Ensure script tags in HTML are correct.");
-      return;
+      console.error("❌ Firebase SDK not loaded. Ensure script tags in HTML are correct.");
+      return false;
     }
 
-    // Initialize Firebase
+    // Initialize Firebase using compat version
     firebase.initializeApp(firebaseConfig);
+
+    // Get Firestore, Storage, and Auth instances
     db = firebase.firestore();
     storage = firebase.storage();
     auth = firebase.auth();
 
     console.log("✅ Firebase initialized successfully");
-    return { db, storage, auth };
+    return true;
   } catch (error) {
     console.error("❌ Firebase initialization error:", error);
+    return false;
   }
 }
 
