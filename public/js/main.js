@@ -112,7 +112,7 @@ function createOfferCard(offer) {
 }
 
 // ============================================
-// Load Featured Products (from API or Local Firestore)
+// Load Featured Products
 // ============================================
 let cachedProducts = [];
 
@@ -122,33 +122,16 @@ async function loadFeaturedProducts() {
   try {
     showLoader();
 
-    // Try to fetch from Wuroud API first
-    const apiUrl = "https://wuroud.vercel.app/api/products";
-    try {
-      const response = await fetch(apiUrl);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.products) {
-          cachedProducts = data.products;
-          console.log(`Loaded ${cachedProducts.length} products from Wuroud API`);
-        } else {
-          throw new Error("Invalid API response");
-        }
-      } else {
-        throw new Error(`API returned ${response.status}`);
-      }
-    } catch (apiError) {
-      console.warn("Could not fetch from Wuroud API, using local Firestore:", apiError);
-      // Fallback to local Firestore
-      const snapshot = await db.collection(COLLECTIONS.products).get();
-      cachedProducts = [];
-      snapshot.forEach((doc) => {
-        cachedProducts.push({
-          id: doc.id,
-          ...doc.data()
-        });
+    // Load from local Firestore
+    const snapshot = await db.collection(COLLECTIONS.products).limit(6).get();
+
+    cachedProducts = [];
+    snapshot.forEach((doc) => {
+      cachedProducts.push({
+        id: doc.id,
+        ...doc.data()
       });
-    }
+    });
 
     if (cachedProducts.length === 0) {
       container.innerHTML = `
@@ -161,8 +144,7 @@ async function loadFeaturedProducts() {
     }
 
     container.innerHTML = "";
-    const featuredProducts = cachedProducts.slice(0, 6);
-    featuredProducts.forEach((product) => {
+    cachedProducts.forEach((product) => {
       const card = createProductCard(product, true);
       container.appendChild(card);
     });

@@ -55,39 +55,20 @@ function closeMenu() {
 // Multi-language support has been disabled
 
 // ============================================
-// Load All Products (from Wuroud API or Local Firestore)
+// Load All Products
 // ============================================
 async function loadAllProducts() {
   try {
     showLoader();
+    const snapshot = await db.collection(COLLECTIONS.products).get();
 
-    // Try to fetch from Wuroud API first
-    const apiUrl = "https://wuroud.vercel.app/api/products";
-    try {
-      const response = await fetch(apiUrl);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.products) {
-          allProducts = data.products;
-          console.log(`Loaded ${allProducts.length} products from Wuroud API`);
-        } else {
-          throw new Error("Invalid API response");
-        }
-      } else {
-        throw new Error(`API returned ${response.status}`);
-      }
-    } catch (apiError) {
-      console.warn("Could not fetch from Wuroud API, using local Firestore:", apiError);
-      // Fallback to local Firestore
-      const snapshot = await db.collection(COLLECTIONS.products).get();
-      allProducts = [];
-      snapshot.forEach((doc) => {
-        allProducts.push({
-          id: doc.id,
-          ...doc.data()
-        });
+    allProducts = [];
+    snapshot.forEach((doc) => {
+      allProducts.push({
+        id: doc.id,
+        ...doc.data()
       });
-    }
+    });
 
     // Load product sizes for footwear items
     await loadProductSizes();
