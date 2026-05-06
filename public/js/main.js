@@ -112,32 +112,62 @@ function createOfferCard(offer) {
 }
 
 // ============================================
-// Load Featured Products
+// Load Featured Products (from API or Local Firestore)
 // ============================================
+let cachedProducts = [];
+
 async function loadFeaturedProducts() {
   const container = document.getElementById("featuredProducts");
 
   try {
-    const snapshot = await db
-      .collection(COLLECTIONS.products)
-      .limit(6)
-      .get();
+    showLoader();
 
-    if (snapshot.empty) {
+    // Try to fetch from Wuroud API first
+    const apiUrl = "https://wuroud.vercel.app/api/products";
+    try {
+      const response = await fetch(apiUrl);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.products) {
+          cachedProducts = data.products;
+          console.log(`Loaded ${cachedProducts.length} products from Wuroud API`);
+        } else {
+          throw new Error("Invalid API response");
+        }
+      } else {
+        throw new Error(`API returned ${response.status}`);
+      }
+    } catch (apiError) {
+      console.warn("Could not fetch from Wuroud API, using local Firestore:", apiError);
+      // Fallback to local Firestore
+      const snapshot = await db.collection(COLLECTIONS.products).get();
+      cachedProducts = [];
+      snapshot.forEach((doc) => {
+        cachedProducts.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+    }
+
+    if (cachedProducts.length === 0) {
       container.innerHTML = `
         <div class="card" style="text-align: center; padding: 2rem; grid-column: 1 / -1;">
           <p style="color: var(--text-secondary);">No products available</p>
         </div>
       `;
+      hideLoader();
       return;
     }
 
     container.innerHTML = "";
-    snapshot.forEach((doc) => {
-      const product = { id: doc.id, ...doc.data() };
+    const featuredProducts = cachedProducts.slice(0, 6);
+    featuredProducts.forEach((product) => {
       const card = createProductCard(product, true);
       container.appendChild(card);
     });
+
+    hideLoader();
   } catch (error) {
     console.error("Error loading featured products:", error);
     container.innerHTML = `
@@ -145,6 +175,7 @@ async function loadFeaturedProducts() {
         <p style="color: var(--text-secondary);">Error loading products</p>
       </div>
     `;
+    hideLoader();
   }
 }
 
