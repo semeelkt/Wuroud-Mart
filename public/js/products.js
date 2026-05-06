@@ -163,10 +163,18 @@ function filterAndSort(searchQuery, category, sortOption) {
   // Sort
   switch (sortOption) {
     case "price-low":
-      filteredProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
+      filteredProducts.sort((a, b) => {
+        const priceA = (a.isOfferProduct && a.offerPrice) ? a.offerPrice : (a.price || 0);
+        const priceB = (b.isOfferProduct && b.offerPrice) ? b.offerPrice : (b.price || 0);
+        return priceA - priceB;
+      });
       break;
     case "price-high":
-      filteredProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
+      filteredProducts.sort((a, b) => {
+        const priceA = (a.isOfferProduct && a.offerPrice) ? a.offerPrice : (a.price || 0);
+        const priceB = (b.isOfferProduct && b.offerPrice) ? b.offerPrice : (b.price || 0);
+        return priceB - priceA;
+      });
       break;
     case "name":
       filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
@@ -222,9 +230,22 @@ function createProductCard(product) {
     ? `<span class="badge badge-success">In Stock</span>`
     : `<span class="badge badge-danger">Out of Stock</span>`;
 
-  const price = product.price
-    ? formatCurrency(product.price)
-    : `<span style="color: var(--accent-color); font-weight: 700;">Contact for Price</span>`;
+  // Display price with offer support
+  let priceHTML;
+  if (product.price === null || product.price === undefined) {
+    priceHTML = `<span style="color: var(--accent-color); font-weight: 700;">Contact for Price</span>`;
+  } else if (product.isOfferProduct && product.offerPrice) {
+    // Show original price crossed out and offer price
+    priceHTML = `
+      <div class="price-wrapper">
+        <div class="price-original">${formatCurrency(product.price)}</div>
+        <div class="price-offer">${formatCurrency(product.offerPrice)}</div>
+        <span class="price-offer-badge">🎁 Sale</span>
+      </div>
+    `;
+  } else {
+    priceHTML = `<div class="product-card-price">${formatCurrency(product.price)}</div>`;
+  }
 
   card.innerHTML = `
     <img src="${getImageUrl(product.imageURL)}"
@@ -235,7 +256,7 @@ function createProductCard(product) {
     <div class="product-card-content">
       <p class="product-card-category">${product.category}</p>
       <h3 class="product-card-name">${product.name}</h3>
-      <div class="product-card-price">${price}</div>
+      ${priceHTML}
       <div class="flex-between mt-2">
         ${stockBadge}
         <span style="font-size: 0.875rem; color: var(--text-secondary);">👁️ View</span>
@@ -272,6 +293,20 @@ function viewProductDetails(product) {
     `;
   }
 
+  // Display price with offer support
+  let priceDisplay;
+  if (product.isOfferProduct && product.offerPrice) {
+    priceDisplay = `
+      <div class="price-wrapper">
+        <div class="price-original">${formatCurrency(product.price)}</div>
+        <div class="price-offer">${formatCurrency(product.offerPrice)}</div>
+        <span class="price-offer-badge">🎁 Special Offer</span>
+      </div>
+    `;
+  } else {
+    priceDisplay = `<h3 class="product-card-price">${formatCurrency(product.price)}</h3>`;
+  }
+
   content.innerHTML = `
     <div class="modal-header">
       <h2>${product.name}</h2>
@@ -286,7 +321,7 @@ function viewProductDetails(product) {
       <div class="flex-between mb-2">
         <div>
           <p class="text-secondary">${product.category}</p>
-          <h3 class="product-card-price">${formatCurrency(product.price)}</h3>
+          ${priceDisplay}
         </div>
         ${product.stock > 0
           ? `<span class="badge badge-success">In Stock</span>`

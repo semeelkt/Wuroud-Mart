@@ -73,6 +73,23 @@ function setupEventListeners() {
     if (productImage) {
       productImage.addEventListener("blur", (e) => previewImageURL(e, "previewImg", "imagePreview"));
     }
+
+    // Handle offerPrice field visibility when modal closes
+    const productModal = document.getElementById("productFormModal");
+    if (productModal) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === "class") {
+            if (!productModal.classList.contains("active")) {
+              // Reset offerPrice field when modal closes
+              document.getElementById("productOfferPrice").value = "";
+              document.getElementById("offerPriceGroup").style.display = "none";
+            }
+          }
+        });
+      });
+      observer.observe(productModal, { attributes: true });
+    }
   }
 
   // Offer Form
@@ -201,12 +218,16 @@ function createProductItem(product) {
     ? `<span style="background: #ff6b6b; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-right: 0.5rem;">🎁 OFFER</span>`
     : "";
 
+  const priceDisplay = product.isOfferProduct && product.offerPrice
+    ? `<p><strong>Price:</strong> <span style="text-decoration: line-through; color: #999;">~${formatCurrency(product.price)}</span> → <span style="color: #d4a574; font-weight: bold;">${formatCurrency(product.offerPrice)}</span></p>`
+    : `<p><strong>Price:</strong> ${formatCurrency(product.price)}</p>`;
+
   item.innerHTML = `
     <img src="${getImageUrl(product.imageURL)}" alt="${product.name}" class="product-item-image" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
     <div class="product-item-info">
       <h3>${offerBadge}${product.name}</h3>
       <p><strong>Category:</strong> ${product.category}</p>
-      <p><strong>Price:</strong> ${formatCurrency(product.price)}</p>
+      ${priceDisplay}
       <p><strong>Stock:</strong> ${product.stock}</p>
       <p><strong>Description:</strong> ${(product.description || "No description").substring(0, 100)}...</p>
     </div>
@@ -226,6 +247,8 @@ function openAddProductForm() {
   editingProductId = null;
   document.getElementById("productFormTitle").textContent = "Add Product";
   document.getElementById("productForm").reset();
+  document.getElementById("productOfferPrice").value = "";
+  document.getElementById("offerPriceGroup").style.display = "none";
   document.getElementById("imagePreview").style.display = "none";
   populateProductCategories();
   document.getElementById("productFormModal").classList.add("active");
@@ -243,6 +266,15 @@ async function editProduct(productId) {
     document.getElementById("productPrice").value = product.price || "";
     document.getElementById("productStock").value = product.stock;
     document.getElementById("productDescription").value = product.description || "";
+
+    // Load offer price if product is an offer
+    if (product.isOfferProduct && product.offerPrice) {
+      document.getElementById("productOfferPrice").value = product.offerPrice || "";
+      document.getElementById("offerPriceGroup").style.display = "block";
+    } else {
+      document.getElementById("productOfferPrice").value = "";
+      document.getElementById("offerPriceGroup").style.display = "none";
+    }
 
     populateProductCategories();
 
@@ -277,9 +309,16 @@ async function deleteProduct(productId) {
 async function toggleOfferProduct(productId, isOffer) {
   try {
     showLoader();
-    await db.collection(COLLECTIONS.products).doc(productId).update({
+    const updateData = {
       isOfferProduct: isOffer
-    });
+    };
+
+    // If marking as not an offer, clear the offer price
+    if (!isOffer) {
+      updateData.offerPrice = null;
+    }
+
+    await db.collection(COLLECTIONS.products).doc(productId).update(updateData);
     showNotification(isOffer ? "Product marked as offer! ✅" : "Removed from offers", "success");
     loadProducts();
   } catch (error) {
@@ -306,6 +345,12 @@ async function saveProduct() {
     if (imageURL) {
       productData.imageURL = imageURL;
       console.log("Using image URL:", imageURL);
+    }
+
+    // Handle offer price
+    const offerPrice = document.getElementById("productOfferPrice").value.trim();
+    if (offerPrice) {
+      productData.offerPrice = parseFloat(offerPrice);
     }
 
     await saveProductToFirestore(productData);
