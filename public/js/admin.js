@@ -71,7 +71,7 @@ function setupEventListeners() {
 
     const productImage = document.getElementById("productImage");
     if (productImage) {
-      productImage.addEventListener("change", (e) => previewImage(e, "previewImg", "imagePreview"));
+      productImage.addEventListener("blur", (e) => previewImageURL(e, "previewImg", "imagePreview"));
     }
   }
 
@@ -85,7 +85,7 @@ function setupEventListeners() {
 
     const offerImage = document.getElementById("offerImage");
     if (offerImage) {
-      offerImage.addEventListener("change", (e) => previewImage(e, "offerPreviewImg", "offerImagePreview"));
+      offerImage.addEventListener("blur", (e) => previewImageURL(e, "offerPreviewImg", "offerImagePreview"));
     }
   }
 
@@ -278,39 +278,11 @@ async function saveProduct() {
       description: document.getElementById("productDescription").value
     };
 
-    // Handle image upload - Store in Firebase Storage
-    const imageFile = document.getElementById("productImage").files[0];
-    if (imageFile) {
-      // Check file size (max 5MB)
-      if (imageFile.size > 5 * 1024 * 1024) {
-        showNotification("Image must be less than 5MB", "error");
-        hideLoader();
-        return;
-      }
-
-      try {
-        // Upload to Firebase Storage
-        const fileName = `products/${Date.now()}_${imageFile.name}`;
-        console.log("Uploading image:", fileName);
-
-        const uploadTask = await storage.ref(fileName).put(imageFile);
-        const imageURL = await uploadTask.ref.getDownloadURL();
-        productData.imageURL = imageURL;
-        console.log("Image uploaded successfully:", imageURL);
-      } catch (uploadError) {
-        console.error("Image upload error:", uploadError);
-
-        // CORS error handling
-        if (uploadError.message.includes("CORS")) {
-          showNotification("⚠️ Storage CORS not configured. Adding product without image.", "warning");
-          console.warn("CORS issue - proceeding without image upload");
-        } else {
-          showNotification("⚠️ Error uploading image. Adding product without image.", "warning");
-        }
-
-        // Continue without image instead of failing completely
-        //productData.imageURL will remain undefined and use placeholder
-      }
+    // Get image URL from input
+    const imageURL = document.getElementById("productImage").value.trim();
+    if (imageURL) {
+      productData.imageURL = imageURL;
+      console.log("Using image URL:", imageURL);
     }
 
     await saveProductToFirestore(productData);
@@ -465,37 +437,11 @@ async function saveOffer() {
     };
 
     // Handle image upload - Store in Firebase Storage
-    const imageFile = document.getElementById("offerImage").files[0];
-    if (imageFile) {
-      // Check file size (max 5MB)
-      if (imageFile.size > 5 * 1024 * 1024) {
-        showNotification("Image must be less than 5MB", "error");
-        hideLoader();
-        return;
-      }
-
-      try {
-        // Upload to Firebase Storage
-        const fileName = `offers/${Date.now()}_${imageFile.name}`;
-        console.log("Uploading offer image:", fileName);
-
-        const uploadTask = await storage.ref(fileName).put(imageFile);
-        const imageURL = await uploadTask.ref.getDownloadURL();
-        offerData.imageURL = imageURL;
-        console.log("Offer image uploaded successfully:", imageURL);
-      } catch (uploadError) {
-        console.error("Offer image upload error:", uploadError);
-
-        // CORS error handling
-        if (uploadError.message.includes("CORS")) {
-          showNotification("⚠️ Storage CORS not configured. Adding offer without image.", "warning");
-          console.warn("CORS issue - proceeding without image upload");
-        } else {
-          showNotification("⚠️ Error uploading image. Adding offer without image.", "warning");
-        }
-
-        // Continue without image instead of failing completely
-      }
+    // Get image URL from input
+    const imageURL = document.getElementById("offerImage").value.trim();
+    if (imageURL) {
+      offerData.imageURL = imageURL;
+      console.log("Using offer image URL:", imageURL);
     }
 
     await saveOfferToFirestore(offerData);
@@ -672,6 +618,16 @@ function previewImage(event, imgId, previewId) {
       document.getElementById(previewId).style.display = "block";
     };
     reader.readAsDataURL(file);
+  }
+}
+
+function previewImageURL(event, imgId, previewId) {
+  const url = event.target.value.trim();
+  if (url) {
+    document.getElementById(imgId).src = url;
+    document.getElementById(previewId).style.display = "block";
+  } else {
+    document.getElementById(previewId).style.display = "none";
   }
 }
 

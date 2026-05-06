@@ -158,8 +158,9 @@
               <input type="number" id="productStock" value="0" required>
             </div>
             <div class="form-group">
-              <label for="productImage">Product Image</label>
-              <input type="file" id="productImage" accept="image/*">
+              <label for="productImage">Product Image URL</label>
+              <input type="url" id="productImage" placeholder="https://example.com/image.jpg">
+              <small style="color: var(--text-secondary);">Paste image URL (e.g., from imgbb.com or any image link)</small>
             </div>
           </div>
 
@@ -212,8 +213,9 @@
           </div>
 
           <div class="form-group">
-            <label for="offerImage">Offer Image</label>
-            <input type="file" id="offerImage" accept="image/*">
+            <label for="offerImage">Offer Image URL</label>
+            <input type="url" id="offerImage" placeholder="https://example.com/image.jpg">
+            <small style="color: var(--text-secondary);">Paste image URL (e.g., from imgbb.com or any image link)</small>
           </div>
 
           <div id="offerImagePreview" style="margin: 1rem 0; display: none;">
