@@ -167,6 +167,11 @@ function switchTab(tabName) {
 async function loadProducts() {
   const container = document.getElementById("productsList");
   try {
+    if (!db) {
+      container.innerHTML = "<p style='text-align: center; color: red;'>Firebase not initialized</p>";
+      return;
+    }
+
     const snapshot = await db.collection(COLLECTIONS.products).get();
     if (snapshot.empty) {
       container.innerHTML = "<p style='text-align: center;'>No products yet</p>";
@@ -354,6 +359,11 @@ function populateProductCategories() {
 async function loadOffers() {
   const container = document.getElementById("offersList");
   try {
+    if (!db) {
+      container.innerHTML = "<p style='text-align: center; color: red;'>Firebase not initialized</p>";
+      return;
+    }
+
     const snapshot = await db.collection(COLLECTIONS.offers).get();
     if (snapshot.empty) {
       container.innerHTML = "<p style='text-align: center;'>No offers yet</p>";
@@ -518,6 +528,11 @@ function closeOfferForm() {
 async function loadInquiries() {
   const container = document.getElementById("inquiriesList");
   try {
+    if (!db) {
+      container.innerHTML = "<p style='text-align: center; color: red;'>Firebase not initialized</p>";
+      return;
+    }
+
     const snapshot = await db.collection(COLLECTIONS.inquiries).orderBy("timestamp", "desc").get();
 
     if (snapshot.empty) {
@@ -625,6 +640,13 @@ async function saveSettings() {
 // Load All Data
 // ============================================
 function loadAllData() {
+  // Wait for Firebase to be ready
+  if (!db || !auth) {
+    console.warn("Firebase not ready, retrying in 500ms...");
+    setTimeout(loadAllData, 500);
+    return;
+  }
+
   populateProductCategories();
   switchTab("products");
 }
