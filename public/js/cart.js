@@ -25,10 +25,10 @@ function saveCart() {
 /**
  * Add product to cart
  */
-function addToCart(product, quantity = 1) {
+function addToCart(product, quantity = 1, selectedSize = null) {
   quantity = parseInt(quantity) || 1;
 
-  const existingItem = cart.find(item => item.id === product.id);
+  const existingItem = cart.find(item => item.id === product.id && item.selectedSize === selectedSize);
 
   if (existingItem) {
     existingItem.quantity += quantity;
@@ -41,7 +41,8 @@ function addToCart(product, quantity = 1) {
       offerPrice: product.offerPrice,
       image: product.imageURL,
       quantity: quantity,
-      category: product.category
+      category: product.category,
+      selectedSize: selectedSize
     });
     showNotification(`${product.name} added to cart!`, "success");
   }
@@ -152,12 +153,19 @@ function createOrderFormModal() {
               </div>
 
               <div class="form-group">
-                <label for="deliveryDate">Preferred Delivery Date *</label>
+                <label for="deliveryDate">Preferred Pickup Date *</label>
                 <input type="date" id="deliveryDate" required>
               </div>
 
               <div class="form-group">
-                <label for="orderNotes">Special Requests (Optional)</label>
+                <label for="pickupTime">Preferred Pickup Time</label>
+                <input type="time" id="pickupTime" placeholder="e.g., 14:00">
+              </div>
+
+              <div id="sizeSelectionContainer"></div>
+
+              <div class="form-group">
+                <label for="orderNotes">Additional Notes (Optional)</label>
                 <textarea id="orderNotes" placeholder="Any special requests or instructions..." style="min-height: 60px;"></textarea>
               </div>
 
@@ -208,7 +216,76 @@ function createOrderFormModal() {
   tomorrow.setDate(tomorrow.getDate() + 1);
   deliveryInput.min = tomorrow.toISOString().split('T')[0];
 
+  // Load size selection for footwear products
+  loadSizeSelection();
+
   return modal;
+}
+
+/**
+ * Load and render size selection for footwear products
+ */
+async function loadSizeSelection() {
+  const footwearItems = cart.filter(item => item.category === 'Footwear');
+
+  if (footwearItems.length === 0) {
+    document.getElementById("sizeSelectionContainer").innerHTML = '';
+    return;
+  }
+
+  let sizeHTML = '<div style="background: var(--bg-light); padding: 1rem; border-radius: 8px; margin: 1rem 0;"><h4 style="margin-top: 0;">📏 Select Sizes</h4>';
+
+  for (const footwearItem of footwearItems) {
+    try {
+      const sizeDoc = await db.collection('productSizes').doc(footwearItem.id).get();
+      const sizes = sizeDoc.exists ? sizeDoc.data().sizes || [] : [];
+
+      sizeHTML += `
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">${footwearItem.name} *</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); gap: 0.5rem;">
+      `;
+
+      if (sizes.length === 0) {
+        sizeHTML += '<p style="color: var(--text-secondary); font-size: 0.875rem;">No sizes available</p>';
+      } else {
+        for (const size of sizes) {
+          const isDisabled = size.stock === 0;
+          const isSelected = cart.find(c => c.id === footwearItem.id)?.selectedSize === size.size;
+          sizeHTML += `
+            <button type="button"
+              class="size-btn ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
+              onclick="selectSize('${footwearItem.id}', '${size.size}', ${isDisabled})"
+              style="padding: 0.5rem; border: 2px solid var(--border-color); border-radius: 4px; background: white; cursor: ${isDisabled ? 'not-allowed' : 'pointer'}; opacity: ${isDisabled ? '0.5' : '1'}; ${isSelected ? 'border-color: var(--primary-blue); background: var(--primary-blue); color: white;' : ''}"
+              ${isDisabled ? 'disabled' : ''}>
+              ${size.size} ${isDisabled ? '(Out)' : ''}
+            </button>
+          `;
+        }
+      }
+
+      sizeHTML += '</div></div>';
+    } catch (error) {
+      console.error(`Error loading sizes for ${footwearItem.id}:`, error);
+    }
+  }
+
+  sizeHTML += '</div>';
+  document.getElementById("sizeSelectionContainer").innerHTML = sizeHTML;
+}
+
+/**
+ * Select size for a footwear product
+ */
+function selectSize(productId, size, isDisabled) {
+  if (isDisabled) return;
+
+  const item = cart.find(c => c.id === productId);
+  if (item) {
+    item.selectedSize = size;
+    saveCart();
+    loadSizeSelection(); // Refresh UI
+  }
 }
 
 /**
@@ -221,18 +298,18 @@ function updateOrderSummary() {
       <div>
         <p style="margin: 0; font-weight: 600;">${item.name}</p>
         <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">
-          Qty: ${item.quantity}
+          Qty: ${item.quantity}${item.selectedSize ? ` | Size: ${item.selectedSize}` : ''}
         </p>
       </div>
       <p style="margin: 0; font-weight: 600; color: var(--primary-blue);">
-        ৳${((item.offerPrice || item.price) * item.quantity).toLocaleString()}
+        ₹${((item.offerPrice || item.price) * item.quantity).toLocaleString()}
       </p>
     </div>
   `).join("");
 
   const total = getCartTotal();
-  document.getElementById("subtotal").textContent = `৳${total.toLocaleString()}`;
-  document.getElementById("totalAmount").textContent = `৳${total.toLocaleString()}`;
+  document.getElementById("subtotal").textContent = `₹${total.toLocaleString()}`;
+  document.getElementById("totalAmount").textContent = `₹${total.toLocaleString()}`;
 }
 
 /**
@@ -241,23 +318,36 @@ function updateOrderSummary() {
 async function submitOrder(e) {
   e.preventDefault();
 
+  // Validate that sizes are selected for footwear products
+  for (const item of cart) {
+    if (item.category === 'Footwear' && !item.selectedSize) {
+      showNotification(`Please select a size for ${item.name}`, "error");
+      return;
+    }
+  }
+
   const orderData = {
     items: cart.map(item => ({
       productId: item.id,
       name: item.name,
       price: item.price,
       offerPrice: item.offerPrice,
-      quantity: item.quantity
+      quantity: item.quantity,
+      selectedSize: item.selectedSize || null,
+      category: item.category
     })),
+    userId: getCurrentUserId() || null,
     customer: {
       name: document.getElementById("orderName").value,
       phone: document.getElementById("orderPhone").value,
       email: document.getElementById("orderEmail").value || null,
       address: document.getElementById("orderAddress").value,
-      preferredDeliveryDate: document.getElementById("deliveryDate").value
+      preferredDeliveryDate: document.getElementById("deliveryDate").value,
+      preferredPickupTime: document.getElementById("pickupTime")?.value || null
     },
     totalAmount: getCartTotal(),
     specialRequests: document.getElementById("orderNotes").value || null,
+    additionalNotes: document.getElementById("orderNotes").value || null,
     status: "pending",
     createdAt: new Date(),
     notes: ""

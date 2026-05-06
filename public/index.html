@@ -3,37 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Premium digital catalog - View our products and contact us via WhatsApp">
-  <title>Wuroud Mart - Premium Products</title>
+  <meta name="description" content="Wuroud Mart - Pre-order your products">
+  <title>Wuroud Mart - Pre-order your products</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2563eb">
-  <style>
-    @media (min-width: 640px) {
-      .hero {
-        padding: 5rem 1rem;
-      }
-
-      .hero h1 {
-        font-size: 3rem;
-      }
-
-      .offers-grid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      }
-    }
-  </style>
 </head>
 <body>
   <!-- Navigation Header -->
   <header>
     <nav>
-      <div class="logo"><i class="fas fa-shopping-bag"></i> Wuroud Mart</div>
+      <div class="logo"><a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-shopping-bag" style="color: var(--primary-green);"></i> <span style="color: var(--text-dark);">Wuroud</span></a></div>
 
       <div class="nav-center">
         <div class="search-bar">
-          <i class="fas fa-search" style="color: var(--text-secondary);"></i>
+          <i class="fas fa-search"></i>
           <input type="text" placeholder="Search for products...">
           <button type="button">Search</button>
         </div>
@@ -43,7 +26,6 @@
         <div class="nav-item" onclick="viewWishlist()">
           <i class="fas fa-heart"></i>
           <span>Wishlist</span>
-          <div id="wishlistBadge" class="nav-badge" style="display: none;">0</div>
         </div>
 
         <div class="nav-item" onclick="openOrderForm()">
@@ -52,7 +34,33 @@
           <div id="cartBadge" class="nav-badge" style="display: none;">0</div>
         </div>
 
-        <div class="nav-item" onclick="window.location.href='admin.html'" style="background: var(--secondary-orange); margin-left: 0.5rem; padding: 0.75rem 1rem; border-radius: 6px;">
+        <div class="nav-item" id="myOrdersBtn" style="display: none; cursor: pointer;" onclick="window.location.href='account.html?tab=orders'">
+          <i class="fas fa-box"></i>
+          <span>My Orders</span>
+        </div>
+
+        <div class="nav-item" id="myAccountBtn" style="display: none; cursor: pointer; position: relative;" onclick="toggleAccountDropdown(event)">
+          <i class="fas fa-user-circle"></i>
+          <span>My Account</span>
+        </div>
+
+        <div id="accountDropdown" style="display: none; position: absolute; top: 50px; right: 10px; background: white; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px; padding: 0; margin: 0;">
+          <div style="padding: 0.5rem 0;">
+            <div style="padding: 0.75rem 1rem; cursor: pointer; color: var(--text-primary); border-bottom: 1px solid var(--border-color);" onclick="redirect('account.html')">
+              <i class="fas fa-user"></i> Profile
+            </div>
+            <div style="padding: 0.75rem 1rem; cursor: pointer; color: var(--text-primary);" onclick="logoutUser()">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </div>
+          </div>
+        </div>
+
+        <div id="authLink" class="nav-item" style="display: none; cursor: pointer; background: var(--primary-green); color: white; padding: 0.75rem 1rem; border-radius: 4px;" onclick="window.location.href='auth.html'">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Login</span>
+        </div>
+
+        <div class="nav-item" id="adminBtn" style="display: none; background: var(--primary-green); color: white; padding: 0.75rem 1rem; border-radius: 4px; cursor: pointer;" onclick="window.location.href='admin.html'">
           <i class="fas fa-cog"></i>
           <span>Admin</span>
         </div>
@@ -64,126 +72,54 @@
         <span></span>
       </button>
     </nav>
+
+    <!-- Category Navigation -->
+    <div class="category-nav">
+      <div class="category-nav-content">
+        <button class="category-btn active" onclick="filterByCategory('All')">
+          <i class="fas fa-th-large"></i> All Categories
+        </button>
+        <button class="category-btn" onclick="filterByCategory('Footwear')">
+          <i class="fas fa-shoe-prints"></i> Footwear
+        </button>
+        <button class="category-btn" onclick="filterByCategory('Toys')">
+          <i class="fas fa-cube"></i> Toys
+        </button>
+        <button class="category-btn" onclick="filterByCategory('Fancy')">
+          <i class="fas fa-sparkles"></i> Fancy
+        </button>
+        <button class="category-btn" onclick="filterByCategory('Stationary')">
+          <i class="fas fa-pen"></i> Stationary
+        </button>
+      </div>
+    </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero" id="home">
+  <!-- Main Content -->
+  <main style="padding: 2rem;">
     <div class="container">
-      <h1>Wuroud Mart</h1>
-      <p>Premium Products Delivered to Your Doorstep</p>
-      <div class="hero-buttons">
-        <a href="products.html" class="btn btn-secondary"><i class="fas fa-shopping-cart"></i> View Products</a>
-        <button class="btn btn-primary" onclick="contactViaWhatsApp()"><i class="fab fa-whatsapp"></i> Contact via WhatsApp</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2 style="margin: 0;">All Products</h2>
+        <span style="color: var(--text-secondary); font-size: 0.9rem;" id="resultCount">Loading...</span>
       </div>
-    </div>
-  </section>
 
-  <!-- Today's Offers Section -->
-  <section id="offers">
-    <div class="container">
-      <div class="section-title">
-        <h2><i class="fas fa-tag"></i> Today's Offers</h2>
-      </div>
-      <div class="grid offers-grid" id="offersContainer">
-        <div class="card" style="text-align: center; padding: 2rem;">
-          <p style="color: var(--text-secondary);">Loading offers...</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Featured Products Section -->
-  <section id="featured" style="background: var(--bg-light);">
-    <div class="container">
-      <div class="section-title">
-        <h2><i class="fas fa-star"></i> Featured Products</h2>
-      </div>
-      <div class="grid" id="featuredProducts">
-        <div class="card" style="text-align: center; padding: 2rem;">
+      <!-- Products Grid -->
+      <div class="grid grid-4" id="productsContainer">
+        <div style="text-align: center; padding: 2rem; grid-column: 1 / -1;">
           <p style="color: var(--text-secondary);">Loading products...</p>
         </div>
       </div>
-      <div class="text-center" style="margin-top: 2rem;">
-        <a href="products.html" class="btn btn-primary"><i class="fas fa-arrow-right"></i> View All Products</a>
-      </div>
     </div>
-  </section>
-
-  <!-- Contact Section -->
-  <section id="contact">
-    <div class="container">
-      <div class="section-title">
-        <h2><i class="fas fa-envelope"></i> Get in Touch</h2>
-        <p>We're here to help! Choose your preferred contact method</p>
-      </div>
-
-      <div class="grid grid-2">
-        <!-- Contact Info Cards -->
-        <div class="card text-center">
-          <h3><i class="fas fa-phone-alt"></i> Call Us</h3>
-          <p style="margin: 1rem 0;">Available during opening hours</p>
-          <a href="tel:+1234567890" class="btn btn-primary btn-block"><i class="fas fa-phone"></i> Call Now</a>
-        </div>
-
-        <div class="card text-center">
-          <h3><i class="fab fa-whatsapp"></i> WhatsApp</h3>
-          <p style="margin: 1rem 0;">Quick response guaranteed</p>
-          <button class="btn btn-success btn-block" onclick="contactViaWhatsApp()"><i class="fab fa-whatsapp"></i> Message on WhatsApp</button>
-        </div>
-      </div>
-
-      <!-- Opening Hours -->
-      <div class="card mt-4">
-        <h3><i class="fas fa-clock"></i> Opening Hours</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-          <div>
-            <p><strong>Monday - Friday:</strong> 09:00 - 22:00</p>
-            <p><strong>Saturday:</strong> 10:00 - 23:00</p>
-          </div>
-          <div>
-            <p><strong>Sunday:</strong> 10:00 - 21:00</p>
-            <p><strong>Holiday:</strong> Closed</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Map Section -->
-      <div class="card mt-4">
-        <h3><i class="fas fa-map-marker-alt"></i> Visit Our Shop</h3>
-        <iframe width="100%" height="300" style="border: none; border-radius: var(--radius); margin-top: 1rem;" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.8354345099136!2d151.19290772342656!3d-33.88261897323157!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12a1e3b5c5b5b5%3A0x5c5b5b5b5b5b5b5b!2sWuroud%20Mart!5e0!3m2!1sen!2sin!4v1234567890" allowfullscreen="" loading="lazy"></iframe>
-      </div>
-
-      <!-- General Inquiry Form -->
-      <div class="card mt-4">
-        <h3><i class="fas fa-paper-plane"></i> Send Us a Message</h3>
-        <form id="inquiryForm" style="margin-top: 1rem;">
-          <div class="form-group">
-            <label for="contactName">Your Name</label>
-            <input type="text" id="contactName" name="name" required>
-          </div>
-          <div class="form-group">
-            <label for="contactPhone">Phone Number</label>
-            <input type="tel" id="contactPhone" name="phone" required>
-          </div>
-          <div class="form-group">
-            <label for="contactMessage">Message</label>
-            <textarea id="contactMessage" name="message" required></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">Send Message</button>
-        </form>
-      </div>
-    </div>
-  </section>
+  </main>
 
   <!-- Footer -->
-  <footer style="background: var(--text-primary); color: var(--bg-white); padding: 2rem 1rem; text-align: center; margin-top: 2rem;">
+  <footer style="background: var(--text-dark); color: white; text-align: center; padding: 2rem; margin-top: 3rem;">
     <div class="container">
       <p>&copy; 2024 Wuroud Mart. All rights reserved.</p>
-      <p style="margin-top: 1rem; font-size: 0.875rem; color: rgba(255,255,255,0.8);">Developed with ❤️ for your convenience</p>
     </div>
   </footer>
 
-  <!-- Firebase SDK (compat version - better CDN support) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -194,22 +130,123 @@
   <script src="js/utils.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/wishlist.js"></script>
-  <script src="js/reviews.js"></script>
-  <script src="js/recommendations.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
 
-  <!-- Service Worker Registration for PWA -->
   <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("sw.js")
-        .then((registration) => {
-          console.log("Service Worker registered successfully:", registration);
-        })
-        .catch((error) => {
-          console.log("Service Worker registration failed:", error);
+    let allProducts = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await initializeFirebase();
+        initAuthListeners();
+        await loadAllProducts();
+        displayProducts(allProducts);
+        setupCategoryFilters();
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+
+    async function loadAllProducts() {
+      try {
+        const snapshot = await db.collection(COLLECTIONS.products || 'products').get();
+        allProducts = [];
+        snapshot.forEach(doc => {
+          allProducts.push({ id: doc.id, ...doc.data() });
         });
+        document.getElementById('resultCount').textContent = `${allProducts.length} Results Found`;
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
     }
+
+    function displayProducts(products) {
+      const container = document.getElementById('productsContainer');
+      if (products.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; grid-column: 1 / -1;"><p style="color: var(--text-secondary);">No products found</p></div>';
+        return;
+      }
+
+      container.innerHTML = products.map(product => `
+        <div class="product-card">
+          <div class="product-image">
+            <img src="${product.imageURL || 'placeholder.jpg'}" alt="${product.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22250%22><rect fill=%22%23f0f0f0%22 width=%22250%22 height=%22250%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2214%22 fill=%22%23999%22>No Image</text></svg>'">
+          </div>
+          <div class="product-info">
+            <div class="product-category">${product.category || 'Other'}</div>
+            <div class="product-name">${product.name}</div>
+            <div class="product-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star-half-alt"></i>
+              <span style="margin-left: 0.5rem; color: var(--text-secondary); font-size: 0.8rem;">(${Math.floor(Math.random() * 500)} reviews)</span>
+            </div>
+            <div class="product-price">
+              <span class="product-price-current">₹${product.price?.toLocaleString()}</span>
+              ${product.offerPrice ? `<span class="product-price-original">₹${(product.offerPrice * 1.2).toLocaleString()}</span>` : ''}
+            </div>
+            <div class="product-stock ${product.stock > 0 ? 'in-stock' : 'out-stock'}">
+              ${product.stock > 0 ? '✓ In Stock' : '✗ Out of Stock'}
+            </div>
+            <div class="product-actions">
+              <button class="btn btn-primary" onclick="addToCart({id: '${product.id}', name: '${product.name}', price: ${product.price}, offerPrice: ${product.offerPrice || 0}, imageURL: '${product.imageURL}', category: '${product.category}'}, 1)">
+                <i class="fas fa-shopping-cart"></i>
+              </button>
+              <button class="btn btn-secondary" onclick="viewProductDetails('${product.id}')">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setupCategoryFilters() {
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          e.target.closest('.category-btn').classList.add('active');
+          const category = e.target.closest('.category-btn').textContent.trim().split('\n')[0];
+          filterByCategory(category);
+        });
+      });
+    }
+
+    function filterByCategory(category) {
+      if (category.includes('All')) {
+        displayProducts(allProducts);
+      } else {
+        const filtered = allProducts.filter(p => p.category === category);
+        displayProducts(filtered);
+        document.getElementById('resultCount').textContent = `${filtered.length} Results Found`;
+      }
+    }
+
+    function viewProductDetails(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      if (!product) return;
+
+      alert(`${product.name}\n₹${product.price}\n\n${product.description || 'No description'}`);
+    }
+
+    function toggleAccountDropdown(event) {
+      event.stopPropagation();
+      const dropdown = document.getElementById('accountDropdown');
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function redirect(url) {
+      window.location.href = url;
+    }
+
+    document.addEventListener('click', () => {
+      const dropdown = document.getElementById('accountDropdown');
+      if (dropdown) {
+        dropdown.style.display = 'none';
+      }
+    });
   </script>
 </body>
 </html>

@@ -47,6 +47,46 @@ function closeMenu() {
 }
 
 // ============================================
+// Account Dropdown & Navigation
+// ============================================
+function toggleAccountDropdown(event) {
+  event.stopPropagation();
+  const dropdown = document.getElementById("accountDropdown");
+  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+function redirect(url) {
+  window.location.href = url;
+}
+
+// Close account dropdown when clicking outside
+document.addEventListener('click', () => {
+  const dropdown = document.getElementById("accountDropdown");
+  if (dropdown) {
+    dropdown.style.display = 'none';
+  }
+});
+
+// ============================================
+// Category Filtering
+// ============================================
+function filterByCategory(category) {
+  // Update active button
+  document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+
+  if (category === 'All') {
+    // Show all products if on home page
+    loadFeaturedProducts();
+  } else {
+    // Navigate to products page with category filter
+    window.location.href = `products.html?category=${category}`;
+  }
+}
+
+// ============================================
 // Language Switcher - REMOVED (Feature removed)
 // ============================================
 // Multi-language support has been disabled

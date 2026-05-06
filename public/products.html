@@ -12,11 +12,11 @@
   <!-- Navigation Header -->
   <header>
     <nav>
-      <div class="logo"><a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-shopping-bag"></i> Wuroud Mart</a></div>
+      <div class="logo"><a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-shopping-bag"></i> <span>Wuroud</span></a></div>
 
       <div class="nav-center">
         <div class="search-bar">
-          <i class="fas fa-search" style="color: var(--text-secondary);"></i>
+          <i class="fas fa-search"></i>
           <input type="text" id="searchBox" placeholder="Search for products...">
           <button type="button" onclick="document.getElementById('searchBox').value ? filterAndSort(document.getElementById('searchBox').value, document.getElementById('categoryFilter').value, document.getElementById('sortBy').value) : null">Search</button>
         </div>
@@ -35,7 +35,33 @@
           <div id="cartBadge" class="nav-badge" style="display: none;">0</div>
         </div>
 
-        <div class="nav-item" onclick="window.location.href='admin.html'" style="background: var(--secondary-orange); margin-left: 0.5rem; padding: 0.75rem 1rem; border-radius: 6px;">
+        <div class="nav-item" id="myOrdersBtn" style="display: none; cursor: pointer;" onclick="window.location.href='account.html?tab=orders'">
+          <i class="fas fa-box"></i>
+          <span>My Orders</span>
+        </div>
+
+        <div class="nav-item" id="myAccountBtn" style="display: none; cursor: pointer; position: relative;" onclick="toggleAccountDropdown(event)">
+          <i class="fas fa-user-circle"></i>
+          <span>My Account</span>
+        </div>
+
+        <div id="accountDropdown" class="nav-item" style="display: none; position: absolute; top: 50px; right: 10px; background: white; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px; padding: 0; margin: 0; flex-direction: column;">
+          <div style="padding: 0.5rem 0;">
+            <div style="padding: 0.75rem 1rem; cursor: pointer; color: var(--text-primary); border-bottom: 1px solid var(--border-color);" onclick="redirect('account.html')">
+              <i class="fas fa-user"></i> Profile
+            </div>
+            <div style="padding: 0.75rem 1rem; cursor: pointer; color: var(--text-primary);" onclick="logoutUser()">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </div>
+          </div>
+        </div>
+
+        <div id="authLink" class="nav-item" style="display: none; cursor: pointer; background: var(--primary-green); color: white; padding: 0.75rem 1rem; border-radius: 4px;" onclick="window.location.href='auth.html'">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Login</span>
+        </div>
+
+        <div class="nav-item" id="adminBtn" style="display: none; background: var(--primary-green); color: white; padding: 0.75rem 1rem; border-radius: 4px; cursor: pointer;" onclick="window.location.href='admin.html'">
           <i class="fas fa-cog"></i>
           <span>Admin</span>
         </div>
@@ -47,6 +73,27 @@
         <span></span>
       </button>
     </nav>
+
+    <!-- Category Navigation -->
+    <div class="category-nav">
+      <div class="category-nav-content">
+        <button class="category-btn active" onclick="filterByCategory('All')">
+          <i class="fas fa-th-large"></i> All Categories
+        </button>
+        <button class="category-btn" onclick="filterByCategory('Footwear')">
+          <i class="fas fa-shoe-prints"></i> Footwear
+        </button>
+        <button class="category-btn" onclick="filterByCategory('Toys')">
+          <i class="fas fa-cube"></i> Toys
+        </button>
+        <button class="category-btn" onclick="filterByCategory('Fancy')">
+          <i class="fas fa-sparkles"></i> Fancy
+        </button>
+        <button class="category-btn" onclick="filterByCategory('Stationary')">
+          <i class="fas fa-pen"></i> Stationary
+        </button>
+      </div>
+    </div>
   </header>
 
   <!-- Page Title -->
@@ -115,6 +162,7 @@
   <script src="js/wishlist.js"></script>
   <script src="js/reviews.js"></script>
   <script src="js/recommendations.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/products.js"></script>
 </body>
 </html>

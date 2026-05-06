@@ -930,7 +930,7 @@ function createOrderItem(order) {
   };
 
   const itemsList = order.items.map(item => `
-    <li>${item.name} x${item.quantity} - ৳${((item.offerPrice || item.price) * item.quantity).toLocaleString()}</li>
+    <li>${item.name} x${item.quantity}${item.selectedSize ? ` (Size: ${item.selectedSize})` : ''} - ₹${((item.offerPrice || item.price) * item.quantity).toLocaleString()}</li>
   `).join('');
 
   item.innerHTML = `
@@ -949,6 +949,7 @@ function createOrderItem(order) {
         <p style="margin: 0.25rem 0; color: var(--text-secondary);">
           <strong>Preferred Date:</strong> ${order.customer.preferredDeliveryDate || 'Not specified'}
         </p>
+        ${order.customer.preferredPickupTime ? `<p style="margin: 0.25rem 0; color: var(--text-secondary);"><strong>Preferred Time:</strong> ${order.customer.preferredPickupTime}</p>` : ''}
       </div>
       <div style="text-align: right;">
         <span style="background: ${statusColors[order.status] || '#999'}; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; display: inline-block; text-transform: uppercase; font-size: 0.85rem;">
@@ -966,8 +967,9 @@ function createOrderItem(order) {
         ${itemsList}
       </ul>
       <div style="margin-top: 0.75rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem; text-align: right; font-weight: 700; color: var(--primary-blue);">
-        Total: ৳${order.totalAmount.toLocaleString()}
+        Total: ₹${order.totalAmount.toLocaleString()}
       </div>
+      ${order.specialRequests || order.additionalNotes ? `<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color); background: #fff8e1; padding: 0.75rem; border-radius: 4px;"><strong>📝 Notes:</strong> ${order.specialRequests || order.additionalNotes}</div>` : ''}
     </div>
 
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
@@ -1030,7 +1032,50 @@ function sendOrderWhatsAppMessage(phone, orderId) {
 }
 
 function viewOrderDetails(orderId) {
-  alert("Order ID: " + orderId + "\n\nFull details view can be implemented here");
+  db.collection(COLLECTIONS.orders || "orders").doc(orderId).get().then(doc => {
+    if (doc.exists) {
+      const order = { id: doc.id, ...doc.data() };
+
+      const itemsHTML = order.items.map(item => `
+        <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">
+          <strong>${item.name}</strong><br>
+          Quantity: ${item.quantity}${item.selectedSize ? ` | Size: ${item.selectedSize}` : ''}<br>
+          Price: ₹${item.price} ${item.offerPrice ? `→ ₹${item.offerPrice}` : ''}<br>
+          Subtotal: ₹${((item.offerPrice || item.price) * item.quantity).toLocaleString()}
+        </div>
+      `).join('');
+
+      const timestamp = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString() : new Date().toLocaleString();
+
+      alert(`
+ORDER DETAILS
+═══════════════════════════
+Order ID: ${order.id}
+Date: ${timestamp}
+Status: ${order.status}
+
+CUSTOMER INFO
+─────────────
+Name: ${order.customer.name}
+Phone: ${order.customer.phone}
+Email: ${order.customer.email || 'Not provided'}
+Address: ${order.customer.address}
+Preferred Date: ${order.customer.preferredDeliveryDate}
+Preferred Time: ${order.customer.preferredPickupTime || 'Not specified'}
+
+ITEMS
+─────────────
+${order.items.map(item => `${item.name} × ${item.quantity}${item.selectedSize ? ` (Size: ${item.selectedSize})` : ''}`).join('\n')}
+
+TOTAL: ₹${order.totalAmount?.toLocaleString() || 0}
+
+${order.specialRequests || order.additionalNotes ? `NOTES: ${order.specialRequests || order.additionalNotes}` : ''}
+      });
+    }
+  }).catch(error => {
+    console.error('Error loading order details:', error);
+    alert('Error loading order details');
+  });
 }
 
 async function deleteOrder(orderId) {
