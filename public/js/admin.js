@@ -6,6 +6,10 @@ let currentUser = null;
 let editingProductId = null;
 let editingOfferId = null;
 
+// Admin credentials
+const ADMIN_EMAIL = "mrflux3602@gmail.com";
+const ADMIN_PASSWORD = "3602mskt";
+
 // ============================================
 // Initialize
 // ============================================
@@ -13,6 +17,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const firebaseReady = await initializeFirebase();
     if (firebaseReady) {
+      // Check if admin account needs to be created
+      await setupAdminAccount();
       checkAuthStatus();
       setupEventListeners();
     } else {
@@ -24,6 +30,59 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("Error initializing app: " + error.message);
   }
 });
+
+// ============================================
+// Setup Admin Account
+// ============================================
+async function setupAdminAccount() {
+  try {
+    // Check if admin user already exists in Firestore
+    const adminDoc = await db.collection('admins').doc(ADMIN_EMAIL).get();
+
+    if (!adminDoc.exists) {
+      console.log('Setting up admin account...');
+
+      // Try to create the admin user
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD);
+        console.log('Admin user created:', userCredential.user.uid);
+
+        // Store admin info in Firestore
+        await db.collection('admins').doc(ADMIN_EMAIL).set({
+          email: ADMIN_EMAIL,
+          uid: userCredential.user.uid,
+          createdAt: new Date(),
+          role: 'admin'
+        });
+
+        console.log('Admin account setup complete!');
+
+        // Logout so user can login with admin credentials
+        await auth.signOut();
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          // User exists, just add to admins collection
+          const existingUser = await auth.currentUser;
+          if (existingUser && existingUser.email === ADMIN_EMAIL) {
+            await db.collection('admins').doc(ADMIN_EMAIL).set({
+              email: ADMIN_EMAIL,
+              uid: existingUser.uid,
+              createdAt: new Date(),
+              role: 'admin'
+            });
+            await auth.signOut();
+          }
+        } else {
+          console.warn('Could not create admin account:', error.message);
+        }
+      }
+    } else {
+      console.log('Admin account already exists');
+    }
+  } catch (error) {
+    console.warn('Error setting up admin account:', error.message);
+  }
+}
 
 // ============================================
 // Authentication
