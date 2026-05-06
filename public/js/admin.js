@@ -273,37 +273,37 @@ async function saveProduct() {
       description: document.getElementById("productDescription").value
     };
 
-    // Handle image upload - Convert to base64 and store in Firestore
+    // Handle image upload - Store in Firebase Storage
     const imageFile = document.getElementById("productImage").files[0];
     if (imageFile) {
-      // Check file size (max 5MB for Firestore)
+      // Check file size (max 5MB)
       if (imageFile.size > 5 * 1024 * 1024) {
         showNotification("Image must be less than 5MB", "error");
         hideLoader();
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          // Store base64 image directly in Firestore
-          productData.imageURL = e.target.result; // base64 string
-          await saveProductToFirestore(productData);
-        } catch (error) {
-          console.error("Error saving product:", error);
-          showNotification("Error saving product", "error");
-          hideLoader();
+      try {
+        // Upload to Firebase Storage
+        const fileName = `products/${Date.now()}_${imageFile.name}`;
+        const uploadTask = await storage.ref(fileName).put(imageFile);
+        const imageURL = await uploadTask.ref.getDownloadURL();
+        productData.imageURL = imageURL;
+        console.log("Image uploaded to Storage:", imageURL);
+      } catch (uploadError) {
+        console.error("Image upload error:", uploadError);
+        showNotification("Error uploading image. Using previous image.", "warning");
+        // Keep existing image if available
+        if (editingProductId) {
+          const existingProduct = await db.collection(COLLECTIONS.products).doc(editingProductId).get();
+          if (existingProduct.data().imageURL) {
+            productData.imageURL = existingProduct.data().imageURL;
+          }
         }
-      };
-      reader.onerror = (error) => {
-        console.error("File read error:", error);
-        showNotification("Error reading file", "error");
-        hideLoader();
-      };
-      reader.readAsDataURL(imageFile);
-    } else {
-      await saveProductToFirestore(productData);
+      }
     }
+
+    await saveProductToFirestore(productData);
   } catch (error) {
     console.error("Error saving product:", error);
     showNotification("Error saving product", "error");
@@ -449,37 +449,37 @@ async function saveOffer() {
       validUntil: new Date(document.getElementById("offerValidUntil").value).toISOString()
     };
 
-    // Handle image upload - Convert to base64 and store in Firestore
+    // Handle image upload - Store in Firebase Storage
     const imageFile = document.getElementById("offerImage").files[0];
     if (imageFile) {
-      // Check file size (max 5MB for Firestore)
+      // Check file size (max 5MB)
       if (imageFile.size > 5 * 1024 * 1024) {
         showNotification("Image must be less than 5MB", "error");
         hideLoader();
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          // Store base64 image directly in Firestore
-          offerData.imageURL = e.target.result; // base64 string
-          await saveOfferToFirestore(offerData);
-        } catch (error) {
-          console.error("Error saving offer:", error);
-          showNotification("Error saving offer", "error");
-          hideLoader();
+      try {
+        // Upload to Firebase Storage
+        const fileName = `offers/${Date.now()}_${imageFile.name}`;
+        const uploadTask = await storage.ref(fileName).put(imageFile);
+        const imageURL = await uploadTask.ref.getDownloadURL();
+        offerData.imageURL = imageURL;
+        console.log("Offer image uploaded to Storage:", imageURL);
+      } catch (uploadError) {
+        console.error("Image upload error:", uploadError);
+        showNotification("Error uploading image. Using previous image.", "warning");
+        // Keep existing image if available
+        if (editingOfferId) {
+          const existingOffer = await db.collection(COLLECTIONS.offers).doc(editingOfferId).get();
+          if (existingOffer.data().imageURL) {
+            offerData.imageURL = existingOffer.data().imageURL;
+          }
         }
-      };
-      reader.onerror = (error) => {
-        console.error("File read error:", error);
-        showNotification("Error reading file", "error");
-        hideLoader();
-      };
-      reader.readAsDataURL(imageFile);
-    } else {
-      await saveOfferToFirestore(offerData);
+      }
     }
+
+    await saveOfferToFirestore(offerData);
   } catch (error) {
     console.error("Error saving offer:", error);
     showNotification("Error saving offer", "error");
