@@ -188,6 +188,10 @@ async function loadProducts() {
 function createProductItem(product) {
   const item = document.createElement("div");
   item.className = "product-item";
+  const manageButton = product.category === "Footwear"
+    ? `<button class="btn btn-info btn-small" onclick="manageSizes('${product.id}')">Sizes</button>`
+    : "";
+
   item.innerHTML = `
     <img src="${getImageUrl(product.imageURL)}" alt="${product.name}" class="product-item-image" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
     <div class="product-item-info">
@@ -198,6 +202,7 @@ function createProductItem(product) {
       <p><strong>Description:</strong> ${(product.description || "No description").substring(0, 100)}...</p>
     </div>
     <div class="product-item-actions">
+      ${manageButton}
       <button class="btn btn-secondary btn-small" onclick="editProduct('${product.id}')">Edit</button>
       <button class="btn btn-danger btn-small" onclick="deleteProduct('${product.id}')">Delete</button>
     </div>
@@ -636,6 +641,165 @@ function previewImage(event, imgId, previewId) {
       document.getElementById(previewId).style.display = "block";
     };
     reader.readAsDataURL(file);
+  }
+}
+
+// ============================================
+// Footwear Size Management
+// ============================================
+let sizesData = {}; // { productId: { sizes: [...] } }
+
+async function manageSizes(productId) {
+  try {
+    showLoader();
+    const productDoc = await db.collection(COLLECTIONS.products).doc(productId).get();
+    const product = productDoc.data();
+
+    // Only allow for footwear category
+    if (product.category !== "Footwear") {
+      showNotification("Size management is only for Footwear products", "error");
+      hideLoader();
+      return;
+    }
+
+    // Load or create size data
+    const sizeDocRef = db.collection(COLLECTIONS.productSizes).doc(productId);
+    const sizeDoc = await sizeDocRef.get();
+    const currentSizes = sizeDoc.exists ? sizeDoc.data().sizes || [] : [];
+
+    // Display size management modal
+    const modal = document.createElement("div");
+    modal.className = "modal";
+    modal.id = "sizesModal";
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+          <h2>Manage Sizes: ${product.name}</h2>
+          <button class="close-btn" onclick="document.getElementById('sizesModal').remove()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div id="sizesList" style="margin-bottom: 1.5rem;"></div>
+
+          <div style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+            <h4>Add New Size</h4>
+            <form id="addSizeForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div>
+                <label>Size</label>
+                <input type="text" id="newSize" placeholder="e.g., 40" required>
+              </div>
+              <div>
+                <label>Stock</label>
+                <input type="number" id="newStock" placeholder="0" min="0" required>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <button type="submit" class="btn btn-primary btn-block">Add Size</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    modal.classList.add("active");
+
+    // Display existing sizes
+    const sizesList = modal.querySelector("#sizesList");
+    if (currentSizes.length === 0) {
+      sizesList.innerHTML = "<p style='text-align: center; color: var(--text-secondary);'>No sizes yet</p>";
+    } else {
+      sizesList.innerHTML = currentSizes.map((s, idx) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 0.5rem;">
+          <div>
+            <strong>Size ${s.size}</strong> - Stock: ${s.stock}
+          </div>
+          <button type="button" class="btn btn-danger btn-small" onclick="removeSize('${productId}', ${idx})">Remove</button>
+        </div>
+      `).join("");
+    }
+
+    // Handle add size form
+    document.getElementById("addSizeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await addSize(productId, currentSizes);
+    });
+
+    hideLoader();
+  } catch (error) {
+    console.error("Error managing sizes:", error);
+    showNotification("Error loading size management", "error");
+    hideLoader();
+  }
+}
+
+async function addSize(productId, currentSizes) {
+  try {
+    const newSize = document.getElementById("newSize").value.trim();
+    const newStock = parseInt(document.getElementById("newStock").value);
+
+    if (!newSize || isNaN(newStock)) {
+      showNotification("Please fill in all fields", "error");
+      return;
+    }
+
+    // Check for duplicate size
+    if (currentSizes.some(s => s.size === newSize)) {
+      showNotification("Size already exists for this product", "error");
+      return;
+    }
+
+    currentSizes.push({ size: newSize, stock: newStock });
+
+    await db.collection(COLLECTIONS.productSizes).doc(productId).set({
+      productId,
+      sizes: currentSizes,
+      updatedAt: new Date()
+    });
+
+    showNotification(`Size ${newSize} added successfully`, "success");
+
+    // Refresh modal
+    const modal = document.getElementById("sizesModal");
+    if (modal) modal.remove();
+    manageSizes(productId);
+  } catch (error) {
+    console.error("Error adding size:", error);
+    showNotification("Error adding size", "error");
+  }
+}
+
+async function removeSize(productId, sizeIndex) {
+  try {
+    if (!confirm("Are you sure you want to delete this size?")) return;
+
+    const sizeDoc = await db.collection(COLLECTIONS.productSizes).doc(productId).get();
+    const sizes = sizeDoc.data().sizes || [];
+
+    if (sizeIndex >= 0 && sizeIndex < sizes.length) {
+      sizes.splice(sizeIndex, 1);
+
+      if (sizes.length === 0) {
+        await db.collection(COLLECTIONS.productSizes).doc(productId).delete();
+      } else {
+        await db.collection(COLLECTIONS.productSizes).doc(productId).set({
+          productId,
+          sizes: sizes,
+          updatedAt: new Date()
+        });
+      }
+
+      showNotification("Size deleted successfully", "success");
+
+      // Refresh modal
+      const modal = document.getElementById("sizesModal");
+      if (modal) {
+        modal.remove();
+        manageSizes(productId);
+      }
+    }
+  } catch (error) {
+    console.error("Error removing size:", error);
+    showNotification("Error deleting size", "error");
   }
 }
 

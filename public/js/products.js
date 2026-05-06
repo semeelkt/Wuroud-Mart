@@ -55,20 +55,42 @@ function closeMenu() {
 // Multi-language support has been disabled
 
 // ============================================
-// Load All Products
+// Load All Products (from Wuroud API or Local Firestore)
 // ============================================
 async function loadAllProducts() {
   try {
     showLoader();
-    const snapshot = await db.collection(COLLECTIONS.products).get();
 
-    allProducts = [];
-    snapshot.forEach((doc) => {
-      allProducts.push({
-        id: doc.id,
-        ...doc.data()
+    // Try to fetch from Wuroud API first
+    const apiUrl = "https://wuroud.vercel.app/api/products";
+    try {
+      const response = await fetch(apiUrl);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.products) {
+          allProducts = data.products;
+          console.log(`Loaded ${allProducts.length} products from Wuroud API`);
+        } else {
+          throw new Error("Invalid API response");
+        }
+      } else {
+        throw new Error(`API returned ${response.status}`);
+      }
+    } catch (apiError) {
+      console.warn("Could not fetch from Wuroud API, using local Firestore:", apiError);
+      // Fallback to local Firestore
+      const snapshot = await db.collection(COLLECTIONS.products).get();
+      allProducts = [];
+      snapshot.forEach((doc) => {
+        allProducts.push({
+          id: doc.id,
+          ...doc.data()
+        });
       });
-    });
+    }
+
+    // Load product sizes for footwear items
+    await loadProductSizes();
 
     // Populate category filter
     populateCategoryFilter();
@@ -78,6 +100,25 @@ async function loadAllProducts() {
     console.error("Error loading products:", error);
     showNotification("Error loading products. Please refresh the page.", "error");
     hideLoader();
+  }
+}
+
+// ============================================
+// Load Product Sizes (for footwear)
+// ============================================
+let productSizes = {}; // Cache: { productId: [{ size, stock, images }] }
+
+async function loadProductSizes() {
+  try {
+    const snapshot = await db.collection(COLLECTIONS.productSizes || "productSizes").get();
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      productSizes[data.productId] = data.sizes || [];
+    });
+    console.log("Product sizes loaded:", productSizes);
+  } catch (error) {
+    console.warn("Error loading product sizes:", error);
+    productSizes = {};
   }
 }
 
@@ -230,6 +271,26 @@ function viewProductDetails(product) {
   const modal = document.getElementById("productModal") || createProductModal();
   const content = modal.querySelector(".modal-content");
 
+  // Get sizes for footwear products
+  const sizes = product.category === "Footwear" ? (productSizes[product.id] || []) : [];
+
+  let sizesHTML = "";
+  if (sizes.length > 0) {
+    sizesHTML = `
+      <h4 style="margin-top: 1.5rem;">Available Sizes</h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 0.5rem; margin: 1rem 0;">
+        ${sizes.map(s => `
+          <div style="padding: 0.75rem; border: 2px solid var(--border-color); border-radius: var(--radius); text-align: center; cursor: pointer; transition: all 0.2s;"
+               onclick="selectSize('${product.id}', '${s.size}')"
+               class="size-option">
+            <strong>${s.size}</strong>
+            <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0.25rem 0;">Stock: ${s.stock}</p>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
   content.innerHTML = `
     <div class="modal-header">
       <h2>${product.name}</h2>
@@ -254,6 +315,8 @@ function viewProductDetails(product) {
       <h4 style="margin-top: 1.5rem;">Description</h4>
       <p>${product.description || "No description available"}</p>
 
+      ${sizesHTML}
+
       ${product.stock > 0
         ? `<div style="background: var(--bg-light); padding: 1rem; border-radius: var(--radius); margin: 1.5rem 0; font-size: 0.875rem;">
           <strong>Stock Available:</strong> ${product.stock} units
@@ -272,6 +335,12 @@ function viewProductDetails(product) {
   `;
 
   modal.classList.add("active");
+}
+
+function selectSize(productId, size) {
+  // Handle size selection - can be expanded to add to cart or make inquiry with size
+  console.log(`Selected size ${size} for product ${productId}`);
+  showNotification(`Size ${size} selected`, "info");
 }
 
 function createProductModal() {
