@@ -178,18 +178,28 @@ async function loadFeaturedProducts() {
   try {
     showLoader();
 
-    // Load from local Firestore
-    const snapshot = await db.collection(COLLECTIONS.products).limit(6).get();
+    // Load all products
+    const snapshot = await db.collection(COLLECTIONS.products).get();
 
-    cachedProducts = [];
+    let allProds = [];
     snapshot.forEach((doc) => {
-      cachedProducts.push({
+      allProds.push({
         id: doc.id,
         ...doc.data()
       });
     });
 
-    if (cachedProducts.length === 0) {
+    // Load reviews for all products
+    for (let product of allProds) {
+      await loadProductReviews(product.id).catch(e => console.error(e));
+    }
+
+    // Make allProducts available globally for recommendations
+    if (typeof window !== 'undefined') {
+      window.allProducts = allProds;
+    }
+
+    if (allProds.length === 0) {
       container.innerHTML = `
         <div class="card" style="text-align: center; padding: 2rem; grid-column: 1 / -1;">
           <p style="color: var(--text-secondary);">No products available</p>
@@ -199,8 +209,18 @@ async function loadFeaturedProducts() {
       return;
     }
 
+    // Get best sellers
+    const bestSellers = allProds
+      .filter(p => p.stock > 0)
+      .sort((a, b) => {
+        const statsA = getProductRatingStats(a.id);
+        const statsB = getProductRatingStats(b.id);
+        return (statsB.reviewCount || 0) - (statsA.reviewCount || 0);
+      })
+      .slice(0, 6);
+
     container.innerHTML = "";
-    cachedProducts.forEach((product) => {
+    bestSellers.forEach((product) => {
       const card = createProductCard(product, true);
       container.appendChild(card);
     });

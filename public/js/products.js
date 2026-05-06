@@ -73,6 +73,11 @@ async function loadAllProducts() {
     // Load product sizes for footwear items
     await loadProductSizes();
 
+    // Load reviews for all products to get ratings
+    for (let product of allProducts) {
+      await loadProductReviews(product.id);
+    }
+
     // Populate category filter
     populateCategoryFilter();
     filteredProducts = [...allProducts];
