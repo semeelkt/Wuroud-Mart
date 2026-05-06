@@ -291,27 +291,32 @@ async function saveProduct() {
       try {
         // Upload to Firebase Storage
         const fileName = `products/${Date.now()}_${imageFile.name}`;
+        console.log("Uploading image:", fileName);
+
         const uploadTask = await storage.ref(fileName).put(imageFile);
         const imageURL = await uploadTask.ref.getDownloadURL();
         productData.imageURL = imageURL;
-        console.log("Image uploaded to Storage:", imageURL);
+        console.log("Image uploaded successfully:", imageURL);
       } catch (uploadError) {
         console.error("Image upload error:", uploadError);
-        showNotification("Error uploading image. Using previous image.", "warning");
-        // Keep existing image if available
-        if (editingProductId) {
-          const existingProduct = await db.collection(COLLECTIONS.products).doc(editingProductId).get();
-          if (existingProduct.data().imageURL) {
-            productData.imageURL = existingProduct.data().imageURL;
-          }
+
+        // CORS error handling
+        if (uploadError.message.includes("CORS")) {
+          showNotification("⚠️ Storage CORS not configured. Adding product without image.", "warning");
+          console.warn("CORS issue - proceeding without image upload");
+        } else {
+          showNotification("⚠️ Error uploading image. Adding product without image.", "warning");
         }
+
+        // Continue without image instead of failing completely
+        //productData.imageURL will remain undefined and use placeholder
       }
     }
 
     await saveProductToFirestore(productData);
   } catch (error) {
     console.error("Error saving product:", error);
-    showNotification("Error saving product", "error");
+    showNotification("Error saving product: " + error.message, "error");
     hideLoader();
   }
 }
@@ -472,20 +477,24 @@ async function saveOffer() {
       try {
         // Upload to Firebase Storage
         const fileName = `offers/${Date.now()}_${imageFile.name}`;
+        console.log("Uploading offer image:", fileName);
+
         const uploadTask = await storage.ref(fileName).put(imageFile);
         const imageURL = await uploadTask.ref.getDownloadURL();
         offerData.imageURL = imageURL;
-        console.log("Offer image uploaded to Storage:", imageURL);
+        console.log("Offer image uploaded successfully:", imageURL);
       } catch (uploadError) {
-        console.error("Image upload error:", uploadError);
-        showNotification("Error uploading image. Using previous image.", "warning");
-        // Keep existing image if available
-        if (editingOfferId) {
-          const existingOffer = await db.collection(COLLECTIONS.offers).doc(editingOfferId).get();
-          if (existingOffer.data().imageURL) {
-            offerData.imageURL = existingOffer.data().imageURL;
-          }
+        console.error("Offer image upload error:", uploadError);
+
+        // CORS error handling
+        if (uploadError.message.includes("CORS")) {
+          showNotification("⚠️ Storage CORS not configured. Adding offer without image.", "warning");
+          console.warn("CORS issue - proceeding without image upload");
+        } else {
+          showNotification("⚠️ Error uploading image. Adding offer without image.", "warning");
         }
+
+        // Continue without image instead of failing completely
       }
     }
 
