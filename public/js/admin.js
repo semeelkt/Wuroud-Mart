@@ -36,16 +36,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ============================================
 async function setupAdminAccount() {
   try {
+    console.log('Starting admin account setup...');
+
+    // Wait a moment to ensure Firebase is ready
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (!db || !auth) {
+      console.warn('Firebase not ready yet');
+      return;
+    }
+
     // Check if admin user already exists in Firestore
     const adminDoc = await db.collection('admins').doc(ADMIN_EMAIL).get();
 
     if (!adminDoc.exists) {
-      console.log('Setting up admin account...');
+      console.log('Admin account does not exist, creating...');
 
-      // Try to create the admin user
       try {
+        // Try to create the admin user
         const userCredential = await auth.createUserWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD);
-        console.log('Admin user created:', userCredential.user.uid);
+        console.log('✅ Admin user created successfully!');
 
         // Store admin info in Firestore
         await db.collection('admins').doc(ADMIN_EMAIL).set({
@@ -55,32 +65,89 @@ async function setupAdminAccount() {
           role: 'admin'
         });
 
-        console.log('Admin account setup complete!');
+        console.log('✅ Admin data saved to Firestore!');
+        console.log(`🎉 Admin account ready! Login with:\n   Email: ${ADMIN_EMAIL}\n   Password: ${ADMIN_PASSWORD}`);
 
         // Logout so user can login with admin credentials
         await auth.signOut();
+        console.log('Logged out - Please login with admin credentials');
+
       } catch (error) {
         if (error.code === 'auth/email-already-in-use') {
-          // User exists, just add to admins collection
-          const existingUser = await auth.currentUser;
-          if (existingUser && existingUser.email === ADMIN_EMAIL) {
+          console.log('Admin user already exists in Firebase');
+
+          // Add to admins collection if not there
+          const currentUser = auth.currentUser;
+          if (currentUser && currentUser.email === ADMIN_EMAIL) {
             await db.collection('admins').doc(ADMIN_EMAIL).set({
               email: ADMIN_EMAIL,
-              uid: existingUser.uid,
+              uid: currentUser.uid,
               createdAt: new Date(),
               role: 'admin'
             });
             await auth.signOut();
           }
         } else {
-          console.warn('Could not create admin account:', error.message);
+          console.error('❌ Error creating admin:', error.message);
+          throw error;
         }
       }
     } else {
-      console.log('Admin account already exists');
+      console.log('✅ Admin account already exists');
     }
   } catch (error) {
-    console.warn('Error setting up admin account:', error.message);
+    console.error('⚠️ Error in setupAdminAccount:', error);
+  }
+}
+
+/**
+ * Manual setup button for admin account
+ */
+async function manualSetupAdmin() {
+  try {
+    const btn = event.target.closest('button');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up...';
+
+    console.log('Manual admin setup starting...');
+
+    if (!db || !auth) {
+      throw new Error('Firebase not initialized');
+    }
+
+    // Create user
+    console.log('Creating user:', ADMIN_EMAIL);
+    const userCredential = await auth.createUserWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD);
+    console.log('✅ User created:', userCredential.user.uid);
+
+    // Save to Firestore
+    console.log('Saving to Firestore...');
+    await db.collection('admins').doc(ADMIN_EMAIL).set({
+      email: ADMIN_EMAIL,
+      uid: userCredential.user.uid,
+      createdAt: new Date(),
+      role: 'admin'
+    });
+    console.log('✅ Admin saved to Firestore');
+
+    // Logout
+    await auth.signOut();
+    console.log('✅ Setup complete!');
+
+    alert('✅ Admin account created successfully!\n\nEmail: ' + ADMIN_EMAIL + '\nPassword: ' + ADMIN_PASSWORD + '\n\nPlease refresh and login.');
+    location.reload();
+
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    const btn = event.target.closest('button');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-wrench"></i> Setup Admin Account';
+
+    if (error.code === 'auth/email-already-in-use') {
+      alert('✅ Admin account already exists!\n\nJust login with:\nEmail: ' + ADMIN_EMAIL + '\nPassword: ' + ADMIN_PASSWORD);
+    } else {
+      alert('❌ Error: ' + error.message);
+    }
   }
 }
 
