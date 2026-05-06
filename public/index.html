@@ -7,6 +7,320 @@
   <title>Wuroud Mart - Pre-order your products</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .main-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      min-height: calc(100vh - 120px);
+    }
+
+    .products-list {
+      border-right: 1px solid var(--border-color);
+      overflow-y: auto;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+
+    .product-details {
+      padding: 2rem;
+      overflow-y: auto;
+      background: white;
+      display: none;
+    }
+
+    .product-details.active {
+      display: block;
+    }
+
+    .back-button {
+      display: none;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: var(--primary-green);
+      cursor: pointer;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-button.show {
+      display: flex;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .product-card-small {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .product-card-small:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+
+    .product-image-small {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      background: #f0f0f0;
+    }
+
+    .product-info-small {
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .product-name-small {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+    }
+
+    .product-price-small {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-green);
+      margin-bottom: 0.5rem;
+    }
+
+    .product-stock-small {
+      font-size: 0.8rem;
+      color: var(--primary-green);
+    }
+
+    .detail-image {
+      width: 100%;
+      height: 350px;
+      object-fit: contain;
+      background: #f9f9f9;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-name {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-category {
+      font-size: 0.75rem;
+      color: var(--primary-green);
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .detail-price {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary-green);
+      margin-bottom: 1rem;
+    }
+
+    .detail-description {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-features {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .feature i {
+      color: var(--primary-green);
+    }
+
+    .size-section {
+      margin-bottom: 2rem;
+    }
+
+    .size-section label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+    }
+
+    .size-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .size-btn {
+      padding: 0.75rem;
+      border: 2px solid var(--border-color);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .size-btn:hover:not(:disabled) {
+      border-color: var(--primary-green);
+      color: var(--primary-green);
+    }
+
+    .size-btn.selected {
+      background: var(--primary-green);
+      color: white;
+      border-color: var(--primary-green);
+    }
+
+    .size-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      color: #999;
+    }
+
+    .size-note {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .preorder-form {
+      background: #f9f9f9;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .preorder-form h3 {
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-row.full {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 3px rgba(29, 135, 68, 0.1);
+    }
+
+    .btn-preorder {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary-green);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-preorder:hover {
+      background: var(--primary-dark-green);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .whatsapp-note {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+
+      .products-list {
+        display: none;
+      }
+
+      .product-details.active {
+        display: block;
+      }
+
+      .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .back-button.show {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .size-buttons {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .detail-image {
+        height: 250px;
+      }
+    }
+  </style>
 </head>
 <body>
   <!-- Navigation Header -->
@@ -17,7 +331,7 @@
       <div class="nav-center">
         <div class="search-bar">
           <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search for products...">
+          <input type="text" id="searchBox" placeholder="Search for products...">
           <button type="button">Search</button>
         </div>
       </div>
@@ -95,22 +409,27 @@
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main style="padding: 2rem;">
-    <div class="container">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2 style="margin: 0;">All Products</h2>
+  <!-- Main Split Screen Layout -->
+  <div class="main-container">
+    <!-- Left: Products List -->
+    <div class="products-list">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0; font-size: 1.5rem;">All Products</h2>
         <span style="color: var(--text-secondary); font-size: 0.9rem;" id="resultCount">Loading...</span>
       </div>
 
-      <!-- Products Grid -->
-      <div class="grid grid-4" id="productsContainer">
-        <div style="text-align: center; padding: 2rem; grid-column: 1 / -1;">
-          <p style="color: var(--text-secondary);">Loading products...</p>
-        </div>
-      </div>
+      <div class="products-grid" id="productsGrid"></div>
     </div>
-  </main>
+
+    <!-- Right: Product Details -->
+    <div class="product-details" id="productDetails">
+      <button class="back-button" onclick="closeProductDetails()">
+        <i class="fas fa-arrow-left"></i> Back to products
+      </button>
+
+      <div id="detailsContent"></div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer style="background: var(--text-dark); color: white; text-align: center; padding: 2rem; margin-top: 3rem;">
@@ -134,14 +453,14 @@
 
   <script>
     let allProducts = [];
+    let selectedProduct = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await initializeFirebase();
         initAuthListeners();
         await loadAllProducts();
-        displayProducts(allProducts);
-        setupCategoryFilters();
+        displayProductsGrid(allProducts);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -149,7 +468,7 @@
 
     async function loadAllProducts() {
       try {
-        const snapshot = await db.collection(COLLECTIONS.products || 'products').get();
+        const snapshot = await db.collection(COLLECTIONS.products || 'products').orderBy('createdAt', 'desc').get();
         allProducts = [];
         snapshot.forEach(doc => {
           allProducts.push({ id: doc.id, ...doc.data() });
@@ -157,78 +476,191 @@
         document.getElementById('resultCount').textContent = `${allProducts.length} Results Found`;
       } catch (error) {
         console.error('Error loading products:', error);
+        document.getElementById('resultCount').textContent = '0 Results Found';
       }
     }
 
-    function displayProducts(products) {
-      const container = document.getElementById('productsContainer');
+    function displayProductsGrid(products) {
+      const grid = document.getElementById('productsGrid');
       if (products.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; grid-column: 1 / -1;"><p style="color: var(--text-secondary);">No products found</p></div>';
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><p style="color: var(--text-secondary);">No products found</p></div>';
         return;
       }
 
-      container.innerHTML = products.map(product => `
-        <div class="product-card">
-          <div class="product-image">
-            <img src="${product.imageURL || 'placeholder.jpg'}" alt="${product.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22250%22><rect fill=%22%23f0f0f0%22 width=%22250%22 height=%22250%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2214%22 fill=%22%23999%22>No Image</text></svg>'">
-          </div>
-          <div class="product-info">
-            <div class="product-category">${product.category || 'Other'}</div>
-            <div class="product-name">${product.name}</div>
-            <div class="product-rating">
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star-half-alt"></i>
-              <span style="margin-left: 0.5rem; color: var(--text-secondary); font-size: 0.8rem;">(${Math.floor(Math.random() * 500)} reviews)</span>
-            </div>
-            <div class="product-price">
-              <span class="product-price-current">₹${product.price?.toLocaleString()}</span>
-              ${product.offerPrice ? `<span class="product-price-original">₹${(product.offerPrice * 1.2).toLocaleString()}</span>` : ''}
-            </div>
-            <div class="product-stock ${product.stock > 0 ? 'in-stock' : 'out-stock'}">
-              ${product.stock > 0 ? '✓ In Stock' : '✗ Out of Stock'}
-            </div>
-            <div class="product-actions">
-              <button class="btn btn-primary" onclick="addToCart({id: '${product.id}', name: '${product.name}', price: ${product.price}, offerPrice: ${product.offerPrice || 0}, imageURL: '${product.imageURL}', category: '${product.category}'}, 1)">
-                <i class="fas fa-shopping-cart"></i>
-              </button>
-              <button class="btn btn-secondary" onclick="viewProductDetails('${product.id}')">
-                <i class="fas fa-eye"></i>
-              </button>
-            </div>
+      grid.innerHTML = products.map(product => `
+        <div class="product-card-small" onclick="showProductDetails('${product.id}')">
+          <img src="${product.imageURL || 'placeholder.jpg'}" alt="${product.name}" class="product-image-small" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22150%22/></svg>'">
+          <div class="product-info-small">
+            <div class="product-name-small">${product.name}</div>
+            <div class="product-price-small">₹${product.price?.toLocaleString()}</div>
+            <div class="product-stock-small">${product.stock > 0 ? '✓ In Stock' : '✗ Out of Stock'}</div>
           </div>
         </div>
       `).join('');
     }
 
-    function setupCategoryFilters() {
-      document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-          e.target.closest('.category-btn').classList.add('active');
-          const category = e.target.closest('.category-btn').textContent.trim().split('\n')[0];
-          filterByCategory(category);
-        });
-      });
-    }
-
-    function filterByCategory(category) {
-      if (category.includes('All')) {
-        displayProducts(allProducts);
-      } else {
-        const filtered = allProducts.filter(p => p.category === category);
-        displayProducts(filtered);
-        document.getElementById('resultCount').textContent = `${filtered.length} Results Found`;
-      }
-    }
-
-    function viewProductDetails(productId) {
+    async function showProductDetails(productId) {
       const product = allProducts.find(p => p.id === productId);
       if (!product) return;
 
-      alert(`${product.name}\n₹${product.price}\n\n${product.description || 'No description'}`);
+      selectedProduct = product;
+      const details = document.getElementById('productDetails');
+      const content = document.getElementById('detailsContent');
+
+      // Load sizes if footwear
+      let sizesHTML = '';
+      if (product.category === 'Footwear') {
+        try {
+          const sizeDoc = await db.collection('productSizes').doc(productId).get();
+          const sizes = sizeDoc.exists ? sizeDoc.data().sizes || [] : [];
+
+          if (sizes.length > 0) {
+            sizesHTML = `
+              <div class="size-section">
+                <label>Select Size</label>
+                <div class="size-buttons">
+                  ${sizes.map(size => `
+                    <button class="size-btn" onclick="selectSize('${size.size}', this)" ${size.stock === 0 ? 'disabled' : ''}>
+                      ${size.size} ${size.stock === 0 ? '(Out)' : ''}
+                    </button>
+                  `).join('')}
+                </div>
+                <div class="size-note">
+                  <i class="fas fa-info-circle"></i>
+                  Only available sizes are shown.
+                </div>
+              </div>
+            `;
+          }
+        } catch (error) {
+          console.error('Error loading sizes:', error);
+        }
+      }
+
+      content.innerHTML = `
+        <div class="detail-category">${product.category || 'Other'}</div>
+        <h1 class="detail-name">${product.name}</h1>
+        <div class="detail-price">₹${product.price?.toLocaleString()}</div>
+        <p class="detail-description">${product.description || 'High-quality product'}</p>
+
+        <div class="detail-features">
+          <div class="feature">
+            <i class="fas fa-check-circle"></i>
+            <span>100% Original</span>
+          </div>
+          <div class="feature">
+            <i class="fas fa-undo"></i>
+            <span>Easy Returns</span>
+          </div>
+        </div>
+
+        ${sizesHTML}
+
+        <div class="preorder-form">
+          <h3>Pre-order Now</h3>
+          <form onsubmit="submitPreorder(event, '${productId}')">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" id="orderName" required>
+              </div>
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="orderPhone" required>
+              </div>
+            </div>
+
+            <div class="form-row full">
+              <div class="form-group">
+                <label>Preferred Pickup Date</label>
+                <input type="date" id="pickupDate" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Preferred Pickup Time</label>
+                <input type="time" id="pickupTime">
+              </div>
+            </div>
+
+            <div class="form-row full">
+              <div class="form-group">
+                <label>Additional Notes (Optional)</label>
+                <textarea id="orderNotes" rows="3" placeholder="Any special requests?"></textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-preorder">Pre-order Now</button>
+            <div class="whatsapp-note">
+              <i class="fab fa-whatsapp"></i> You will receive a confirmation on WhatsApp
+            </div>
+          </form>
+        </div>
+      `;
+
+      // Set minimum date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('pickupDate').min = tomorrow.toISOString().split('T')[0];
+
+      details.classList.add('active');
+      document.querySelector('.back-button').classList.add('show');
+    }
+
+    function selectSize(size, btn) {
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      if (selectedProduct) {
+        selectedProduct.selectedSize = size;
+      }
+    }
+
+    function submitPreorder(event, productId) {
+      event.preventDefault();
+
+      const name = document.getElementById('orderName').value;
+      const phone = document.getElementById('orderPhone').value;
+      const date = document.getElementById('pickupDate').value;
+      const time = document.getElementById('pickupTime').value;
+      const notes = document.getElementById('orderNotes').value;
+      const selectedSize = document.querySelector('.size-btn.selected')?.textContent?.trim() || null;
+
+      // Check if size is required but not selected
+      if (selectedProduct.category === 'Footwear' && !selectedSize) {
+        showNotification('Please select a size', 'error');
+        return;
+      }
+
+      // Add to cart with details
+      addToCart({
+        id: productId,
+        name: selectedProduct.name,
+        price: selectedProduct.price,
+        imageURL: selectedProduct.imageURL,
+        category: selectedProduct.category,
+        selectedSize: selectedSize
+      }, 1);
+
+      // Show success
+      showNotification('Product added to cart! Continue shopping or proceed to checkout.', 'success');
+      closeProductDetails();
+    }
+
+    function closeProductDetails() {
+      document.getElementById('productDetails').classList.remove('active');
+      document.querySelector('.back-button').classList.remove('show');
+      selectedProduct = null;
+    }
+
+    function filterByCategory(category) {
+      if (category === 'All') {
+        displayProductsGrid(allProducts);
+      } else {
+        const filtered = allProducts.filter(p => p.category === category);
+        displayProductsGrid(filtered);
+        document.getElementById('resultCount').textContent = `${filtered.length} Results Found`;
+      }
     }
 
     function toggleAccountDropdown(event) {
