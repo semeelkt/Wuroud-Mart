@@ -197,10 +197,14 @@ function createProductItem(product) {
     ? `<button class="btn btn-info btn-small" onclick="manageSizes('${product.id}')">Sizes</button>`
     : "";
 
+  const offerBadge = product.isOfferProduct
+    ? `<span style="background: #ff6b6b; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-right: 0.5rem;">🎁 OFFER</span>`
+    : "";
+
   item.innerHTML = `
     <img src="${getImageUrl(product.imageURL)}" alt="${product.name}" class="product-item-image" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
     <div class="product-item-info">
-      <h3>${product.name}</h3>
+      <h3>${offerBadge}${product.name}</h3>
       <p><strong>Category:</strong> ${product.category}</p>
       <p><strong>Price:</strong> ${formatCurrency(product.price)}</p>
       <p><strong>Stock:</strong> ${product.stock}</p>
@@ -208,6 +212,9 @@ function createProductItem(product) {
     </div>
     <div class="product-item-actions">
       ${manageButton}
+      <button class="btn ${product.isOfferProduct ? 'btn-success' : 'btn-outline'} btn-small" onclick="toggleOfferProduct('${product.id}', ${!product.isOfferProduct})">
+        ${product.isOfferProduct ? '✅ Offer' : '⭕ Mark Offer'}
+      </button>
       <button class="btn btn-secondary btn-small" onclick="editProduct('${product.id}')">Edit</button>
       <button class="btn btn-danger btn-small" onclick="deleteProduct('${product.id}')">Delete</button>
     </div>
@@ -262,6 +269,22 @@ async function deleteProduct(productId) {
   } catch (error) {
     console.error("Error deleting product:", error);
     showNotification("Error deleting product", "error");
+  } finally {
+    hideLoader();
+  }
+}
+
+async function toggleOfferProduct(productId, isOffer) {
+  try {
+    showLoader();
+    await db.collection(COLLECTIONS.products).doc(productId).update({
+      isOfferProduct: isOffer
+    });
+    showNotification(isOffer ? "Product marked as offer! ✅" : "Removed from offers", "success");
+    loadProducts();
+  } catch (error) {
+    console.error("Error updating product:", error);
+    showNotification("Error updating product", "error");
   } finally {
     hideLoader();
   }

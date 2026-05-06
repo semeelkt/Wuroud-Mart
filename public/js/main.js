@@ -52,16 +52,43 @@ function closeMenu() {
 // Multi-language support has been disabled
 
 // ============================================
-// Load Offers Section
+// Load Offers Section (Offers + Offer Products)
 // ============================================
 async function loadOffers() {
   const offersContainer = document.getElementById("offersContainer");
 
   try {
     showLoader();
-    const snapshot = await db.collection(COLLECTIONS.offers).limit(3).get();
 
-    if (snapshot.empty) {
+    const allCards = [];
+
+    // Load manual offers
+    const offersSnapshot = await db.collection(COLLECTIONS.offers).limit(3).get();
+    offersSnapshot.forEach((doc) => {
+      const offer = doc.data();
+      allCards.push({
+        type: 'offer',
+        data: offer,
+        priority: 1
+      });
+    });
+
+    // Load products marked as offer products
+    const productSnapshot = await db.collection(COLLECTIONS.products)
+      .where('isOfferProduct', '==', true)
+      .limit(3)
+      .get();
+
+    productSnapshot.forEach((doc) => {
+      const product = { id: doc.id, ...doc.data() };
+      allCards.push({
+        type: 'product',
+        data: product,
+        priority: 2
+      });
+    });
+
+    if (allCards.length === 0) {
       offersContainer.innerHTML = `
         <div class="card" style="text-align: center; padding: 2rem; grid-column: 1 / -1;">
           <p style="color: var(--text-secondary);">No offers available right now</p>
@@ -72,11 +99,14 @@ async function loadOffers() {
     }
 
     offersContainer.innerHTML = "";
-    snapshot.forEach((doc) => {
-      const offer = doc.data();
-      const card = createOfferCard(offer);
+    allCards.forEach((item) => {
+      const card = item.type === 'offer'
+        ? createOfferCard(item.data)
+        : createOfferProductCard(item.data);
       offersContainer.appendChild(card);
     });
+
+    hideLoader();
   } catch (error) {
     console.error("Error loading offers:", error);
     offersContainer.innerHTML = `
@@ -84,9 +114,35 @@ async function loadOffers() {
         <p style="color: var(--text-secondary);">Error loading offers</p>
       </div>
     `;
-  } finally {
     hideLoader();
   }
+}
+
+function createOfferProductCard(product) {
+  const card = document.createElement("div");
+  card.className = "card product-card fade-in";
+  card.onclick = () => viewProductDetails(product);
+
+  card.innerHTML = `
+    <img src="${getImageUrl(product.imageURL)}"
+         alt="${product.name}"
+         class="product-card-image"
+         loading="lazy"
+         onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+    <div class="product-card-content">
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <span style="background: #ff6b6b; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">🎁 OFFER</span>
+      </div>
+      <h3 class="product-card-name">${product.name}</h3>
+      <p style="color: var(--text-secondary); font-size: 0.875rem;">${product.category}</p>
+      <div class="product-card-price">${formatCurrency(product.price)}</div>
+      <div class="flex-between mt-2">
+        <span class="badge badge-success">In Stock</span>
+        <span style="font-size: 0.875rem; color: var(--text-secondary);">👁️ View</span>
+      </div>
+    </div>
+  `;
+  return card;
 }
 
 function createOfferCard(offer) {
