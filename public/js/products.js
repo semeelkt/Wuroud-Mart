@@ -230,12 +230,8 @@ function createProductCard(product) {
   const card = document.createElement("div");
   card.className = "product-card";
 
-  const stockBadge = product.stock > 0
-    ? `<span class="badge badge-success">In Stock</span>`
-    : `<span class="badge badge-danger">Out of Stock</span>`;
-
   const offerBadge = (product.isOfferProduct && product.offerPrice)
-    ? `<div class="badge-offer">Save ${Math.round(((product.price - product.offerPrice) / product.price * 100))}%</div>`
+    ? `<div class="badge-offer">-${Math.round(((product.price - product.offerPrice) / product.price * 100))}%</div>`
     : "";
 
   // Get rating stats
@@ -254,20 +250,24 @@ function createProductCard(product) {
   // Display price with offer support
   let priceHTML;
   if (product.price === null || product.price === undefined) {
-    priceHTML = `<div class="product-price" style="color: var(--primary-blue);">Contact Price</div>`;
+    priceHTML = `<div class="product-price">Contact</div>`;
   } else if (product.isOfferProduct && product.offerPrice) {
     // Show original price crossed out and offer price
     priceHTML = `
       <div class="product-price-wrapper">
-        <div class="product-price-original">${formatCurrency(product.price)}</div>
-        <div class="product-price">${formatCurrency(product.offerPrice)}</div>
+        <div class="product-price-original">৳${product.price}</div>
+        <div class="product-price">৳${product.offerPrice}</div>
       </div>
     `;
   } else {
-    priceHTML = `<div class="product-price">${formatCurrency(product.price)}</div>`;
+    priceHTML = `<div class="product-price">৳${product.price}</div>`;
   }
 
   const inWishlist = isInWishlist(product.id);
+
+  const stockStatus = product.stock > 0
+    ? `<div class="product-stock in-stock">✓ In Stock</div>`
+    : `<div class="product-stock out-of-stock">✕ Out of Stock</div>`;
 
   card.innerHTML = `
     <div class="product-image-wrapper">
@@ -276,30 +276,24 @@ function createProductCard(product) {
            alt="${product.name}"
            class="product-card-image"
            loading="lazy"
-           onerror="this.src='https://via.placeholder.com/280?text=No+Image'">
+           onerror="this.src='https://via.placeholder.com/240?text=No+Image'">
     </div>
     <div class="product-card-content">
-      <p class="product-card-category">${product.category}</p>
       <h3 class="product-card-name">${product.name}</h3>
       ${ratingHTML}
       ${priceHTML}
-      <div class="product-stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
-        ${product.stock > 0 ? `✓ ${product.stock} in stock` : '✕ Out of stock'}
-      </div>
+      ${stockStatus}
       <div class="product-card-actions">
         <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart({id: '${product.id}', name: '${product.name}', price: ${product.price}, offerPrice: ${product.offerPrice || 'null'}, imageURL: '${product.imageURL}'})" ${product.stock === 0 ? 'disabled' : ''}>
-          🛒 Add to Cart
+          Add
         </button>
         <button class="btn-buy-now" onclick="event.stopPropagation(); addToCart({id: '${product.id}', name: '${product.name}', price: ${product.price}, offerPrice: ${product.offerPrice || 'null'}, imageURL: '${product.imageURL}'}); openOrderForm();" ${product.stock === 0 ? 'disabled' : ''}>
-          🛍️ Buy Now
+          Buy
         </button>
-        <button class="btn-wishlist ${inWishlist ? 'active' : ''}" data-product-id="${product.id}" onclick="event.stopPropagation(); toggleWishlist({id: '${product.id}', name: '${product.name}', price: ${product.price}, offerPrice: ${product.offerPrice || 'null'}, imageURL: '${product.imageURL}', category: '${product.category}'}); updateWishlistButtons();">
+        <button class="btn-wishlist ${inWishlist ? 'active' : ''}" data-product-id="${product.id}" onclick="event.stopPropagation(); toggleWishlist({id: '${product.id}', name: '${product.name}', price: ${product.price}, offerPrice: ${product.offerPrice || 'null'}, imageURL: '${product.imageURL}', category: '${product.category}'}); updateWishlistButtons();" title="Add to wishlist">
           ${inWishlist ? '❤️' : '🤍'}
         </button>
       </div>
-      <button class="btn btn-outline btn-small btn-block" onclick="event.stopPropagation(); viewProductDetails({...this.parentElement.data, id: '${product.id}'})">
-        View Details
-      </button>
     </div>
   `;
 
