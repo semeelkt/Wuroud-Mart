@@ -223,46 +223,82 @@ function displayProducts(products) {
 
 function createProductCard(product) {
   const card = document.createElement("div");
-  card.className = "card product-card fade-in";
-  card.onclick = () => viewProductDetails(product);
+  card.className = "product-card";
 
   const stockBadge = product.stock > 0
     ? `<span class="badge badge-success">In Stock</span>`
     : `<span class="badge badge-danger">Out of Stock</span>`;
 
+  const offerBadge = (product.isOfferProduct && product.offerPrice)
+    ? `<div class="badge-offer">Save ${Math.round(((product.price - product.offerPrice) / product.price * 100))}%</div>`
+    : "";
+
+  // Get rating stats
+  const ratingStats = getProductRatingStats(product.id);
+  const ratingHTML = ratingStats.reviewCount > 0
+    ? `
+      <div class="product-rating">
+        <div class="rating-stars">
+          ${getRatingStarsHTML(ratingStats.averageRating)}
+        </div>
+        <span class="rating-count">(${ratingStats.reviewCount})</span>
+      </div>
+    `
+    : `<div class="product-rating"><span class="rating-count">No reviews</span></div>`;
+
   // Display price with offer support
   let priceHTML;
   if (product.price === null || product.price === undefined) {
-    priceHTML = `<span style="color: var(--accent-color); font-weight: 700;">Contact for Price</span>`;
+    priceHTML = `<div class="product-price" style="color: var(--primary-blue);">Contact Price</div>`;
   } else if (product.isOfferProduct && product.offerPrice) {
     // Show original price crossed out and offer price
     priceHTML = `
-      <div class="price-wrapper">
-        <div class="price-original">${formatCurrency(product.price)}</div>
-        <div class="price-offer">${formatCurrency(product.offerPrice)}</div>
-        <span class="price-offer-badge">🎁 Sale</span>
+      <div class="product-price-wrapper">
+        <div class="product-price-original">${formatCurrency(product.price)}</div>
+        <div class="product-price">${formatCurrency(product.offerPrice)}</div>
       </div>
     `;
   } else {
-    priceHTML = `<div class="product-card-price">${formatCurrency(product.price)}</div>`;
+    priceHTML = `<div class="product-price">${formatCurrency(product.price)}</div>`;
   }
 
+  const inWishlist = isInWishlist(product.id);
+
   card.innerHTML = `
-    <img src="${getImageUrl(product.imageURL)}"
-         alt="${product.name}"
-         class="product-card-image"
-         loading="lazy"
-         onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+    <div class="product-image-wrapper">
+      ${offerBadge}
+      <img src="${getImageUrl(product.imageURL)}"
+           alt="${product.name}"
+           class="product-card-image"
+           loading="lazy"
+           onerror="this.src='https://via.placeholder.com/280?text=No+Image'">
+    </div>
     <div class="product-card-content">
       <p class="product-card-category">${product.category}</p>
       <h3 class="product-card-name">${product.name}</h3>
+      ${ratingHTML}
       ${priceHTML}
-      <div class="flex-between mt-2">
-        ${stockBadge}
-        <span style="font-size: 0.875rem; color: var(--text-secondary);">👁️ View</span>
+      <div class="product-stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
+        ${product.stock > 0 ? `✓ ${product.stock} in stock` : '✕ Out of stock'}
       </div>
+      <div class="product-card-actions">
+        <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart({id: '${product.id}', name: '${product.name}', price: ${product.price}, offerPrice: ${product.offerPrice || 'null'}, imageURL: '${product.imageURL}'})" ${product.stock === 0 ? 'disabled' : ''}>
+          🛒 Add to Cart
+        </button>
+        <button class="btn-buy-now" onclick="event.stopPropagation(); addToCart({id: '${product.id}', name: '${product.name}', price: ${product.price}, offerPrice: ${product.offerPrice || 'null'}, imageURL: '${product.imageURL}'}); openOrderForm();" ${product.stock === 0 ? 'disabled' : ''}>
+          🛍️ Buy Now
+        </button>
+        <button class="btn-wishlist ${inWishlist ? 'active' : ''}" data-product-id="${product.id}" onclick="event.stopPropagation(); toggleWishlist({id: '${product.id}', name: '${product.name}', price: ${product.price}, offerPrice: ${product.offerPrice || 'null'}, imageURL: '${product.imageURL}', category: '${product.category}'}); updateWishlistButtons();">
+          ${inWishlist ? '❤️' : '🤍'}
+        </button>
+      </div>
+      <button class="btn btn-outline btn-small btn-block" onclick="event.stopPropagation(); viewProductDetails({...this.parentElement.data, id: '${product.id}'})">
+        View Details
+      </button>
     </div>
   `;
+
+  card.data = product;
   return card;
 }
 

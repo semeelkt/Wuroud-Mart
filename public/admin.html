@@ -46,6 +46,7 @@
       <aside class="admin-sidebar">
         <nav>
           <button class="nav-btn active" data-tab="products"><i class="fas fa-box"></i> Products</button>
+          <button class="nav-btn" data-tab="orders"><i class="fas fa-shopping-cart"></i> Orders</button>
           <button class="nav-btn" data-tab="offers"><i class="fas fa-gift"></i> Offers</button>
           <button class="nav-btn" data-tab="inquiries"><i class="fas fa-comments"></i> Inquiries</button>
           <button class="nav-btn" data-tab="settings"><i class="fas fa-sliders-h"></i> Settings</button>
@@ -63,6 +64,31 @@
 
           <div class="products-list" id="productsList">
             <div style="text-align: center; padding: 2rem;">Loading products...</div>
+          </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div class="tab-content" id="orders-tab">
+          <div class="tab-header">
+            <h2><i class="fas fa-shopping-cart"></i> Customer Orders</h2>
+            <button class="btn btn-info btn-small" onclick="exportOrdersToCSV()"><i class="fas fa-download"></i> Export Orders</button>
+          </div>
+
+          <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+            <select id="orderStatusFilter" style="padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px;">
+              <option value="">All Orders</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <input type="text" id="orderSearchPhone" placeholder="Search by phone number..." style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px;">
+            <button class="btn btn-secondary btn-small" onclick="loadOrders()">Filter</button>
+          </div>
+
+          <div class="orders-list" id="ordersList">
+            <div style="text-align: center; padding: 2rem;">Loading orders...</div>
           </div>
         </div>
 

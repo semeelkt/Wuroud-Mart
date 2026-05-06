@@ -30,17 +30,39 @@
   <header>
     <nav>
       <div class="logo"><i class="fas fa-shopping-bag"></i> Wuroud Mart</div>
+
+      <div class="nav-center">
+        <div class="search-bar">
+          <i class="fas fa-search" style="color: var(--text-secondary);"></i>
+          <input type="text" placeholder="Search for products...">
+          <button type="button">Search</button>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <div class="nav-item" onclick="viewWishlist()">
+          <i class="fas fa-heart"></i>
+          <span>Wishlist</span>
+          <div id="wishlistBadge" class="nav-badge" style="display: none;">0</div>
+        </div>
+
+        <div class="nav-item" onclick="openOrderForm()">
+          <i class="fas fa-shopping-cart"></i>
+          <span>Cart</span>
+          <div id="cartBadge" class="nav-badge" style="display: none;">0</div>
+        </div>
+
+        <div class="nav-item" onclick="window.location.href='admin.html'" style="background: var(--secondary-orange); margin-left: 0.5rem; padding: 0.75rem 1rem; border-radius: 6px;">
+          <i class="fas fa-cog"></i>
+          <span>Admin</span>
+        </div>
+      </div>
+
       <button class="hamburger" id="hamburger">
         <span></span>
         <span></span>
         <span></span>
       </button>
-      <ul class="nav-menu" id="navMenu">
-        <li><a href="#home" onclick="closeMenu()"><i class="fas fa-home"></i> Home</a></li>
-        <li><a href="products.html" onclick="closeMenu()"><i class="fas fa-box"></i> Products</a></li>
-        <li><a href="#contact" onclick="closeMenu()"><i class="fas fa-phone"></i> Contact</a></li>
-        <li><a href="admin.html" onclick="closeMenu()"><i class="fas fa-cog"></i> Admin</a></li>
-      </ul>
     </nav>
   </header>
 
@@ -170,6 +192,9 @@
   <!-- App Scripts -->
   <script src="js/config.js"></script>
   <script src="js/utils.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/wishlist.js"></script>
+  <script src="js/reviews.js"></script>
   <script src="js/main.js"></script>
 
   <!-- Service Worker Registration for PWA -->

@@ -173,6 +173,7 @@ function switchTab(tabName) {
 
   // Load tab data
   if (tabName === "products") loadProducts();
+  if (tabName === "orders") loadOrders();
   if (tabName === "offers") loadOffers();
   if (tabName === "inquiries") loadInquiries();
   if (tabName === "settings") loadSettings();
@@ -858,7 +859,203 @@ async function removeSize(productId, sizeIndex) {
   }
 }
 
+// ============================================
+// Orders Management
+// ============================================
+async function loadOrders() {
+  const container = document.getElementById("ordersList");
+  try {
+    if (!db) {
+      container.innerHTML = "<p style='text-align: center; color: red;'>Firebase not initialized</p>";
+      return;
+    }
+
+    let query = db.collection(COLLECTIONS.orders || "orders");
+
+    // Apply filters
+    const statusFilter = document.getElementById("orderStatusFilter").value;
+    const phoneFilter = document.getElementById("orderSearchPhone").value;
+
+    if (statusFilter) {
+      query = query.where("status", "==", statusFilter);
+    }
+
+    const snapshot = await query.orderBy("createdAt", "desc").get();
+
+    if (snapshot.empty) {
+      container.innerHTML = "<p style='text-align: center;'>No orders yet</p>";
+      return;
+    }
+
+    container.innerHTML = "";
+    let filteredCount = 0;
+
+    snapshot.forEach((doc) => {
+      const order = { id: doc.id, ...doc.data() };
+
+      // Apply phone filter
+      if (phoneFilter && !order.customer.phone.includes(phoneFilter)) {
+        return;
+      }
+
+      filteredCount++;
+      const item = createOrderItem(order);
+      container.appendChild(item);
+    });
+
+    if (filteredCount === 0) {
+      container.innerHTML = "<p style='text-align: center;'>No orders match your filters</p>";
+    }
+  } catch (error) {
+    console.error("Error loading orders:", error);
+    container.innerHTML = "<p style='text-align: center; color: red;'>Error loading orders</p>";
+  }
+}
+
+function createOrderItem(order) {
+  const item = document.createElement("div");
+  item.className = "order-item card";
+  item.style.marginBottom = "1rem";
+
+  const timestamp = order.createdAt?.toDate
+    ? order.createdAt.toDate().toLocaleString()
+    : new Date().toLocaleString();
+
+  const statusColors = {
+    pending: "#FF9800",
+    confirmed: "#2196F3",
+    shipped: "#9C27B0",
+    delivered: "#4CAF50",
+    cancelled: "#F44336"
+  };
+
+  const itemsList = order.items.map(item => `
+    <li>${item.name} x${item.quantity} - ৳${((item.offerPrice || item.price) * item.quantity).toLocaleString()}</li>
+  `).join('');
+
+  item.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+      <div>
+        <h3>#${order.id.substring(0, 8).toUpperCase()}</h3>
+        <p style="margin: 0.25rem 0; color: var(--text-secondary);">
+          <strong>Customer:</strong> ${order.customer.name}
+        </p>
+        <p style="margin: 0.25rem 0; color: var(--text-secondary);">
+          <strong>Phone:</strong> <a href="tel:${order.customer.phone}" style="color: var(--primary-blue);">${order.customer.phone}</a>
+        </p>
+        <p style="margin: 0.25rem 0; color: var(--text-secondary);">
+          <strong>Delivery:</strong> ${order.customer.address}
+        </p>
+        <p style="margin: 0.25rem 0; color: var(--text-secondary);">
+          <strong>Preferred Date:</strong> ${order.customer.preferredDeliveryDate || 'Not specified'}
+        </p>
+      </div>
+      <div style="text-align: right;">
+        <span style="background: ${statusColors[order.status] || '#999'}; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; display: inline-block; text-transform: uppercase; font-size: 0.85rem;">
+          ${order.status}
+        </span>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+          ${timestamp}
+        </p>
+      </div>
+    </div>
+
+    <div style="background: var(--bg-light); padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+      <p style="margin: 0 0 0.5rem 0; font-weight: 700;">Items:</p>
+      <ul style="margin: 0; padding-left: 1.5rem;">
+        ${itemsList}
+      </ul>
+      <div style="margin-top: 0.75rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem; text-align: right; font-weight: 700; color: var(--primary-blue);">
+        Total: ৳${order.totalAmount.toLocaleString()}
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <select id="status-${order.id}" value="${order.status}"
+        style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 600;"
+        onchange="updateOrderStatus('${order.id}', this.value)">
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+
+      <button class="btn btn-success btn-small" onclick="sendOrderWhatsAppMessage('${order.customer.phone}', '${order.id}')">
+        <i class="fab fa-whatsapp"></i> Send WhatsApp
+      </button>
+
+      <button class="btn btn-secondary btn-small" onclick="viewOrderDetails('${order.id}')">
+        View Details
+      </button>
+
+      <button class="btn btn-danger btn-small" onclick="deleteOrder('${order.id}')">
+        Delete
+      </button>
+    </div>
+  `;
+
+  // Set the current value
+  setTimeout(() => {
+    const select = document.getElementById(`status-${order.id}`);
+    if (select) {
+      select.value = order.status;
+    }
+  }, 0);
+
+  return item;
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  try {
+    showLoader();
+    await db.collection(COLLECTIONS.orders || "orders").doc(orderId).update({
+      status: newStatus,
+      updatedAt: new Date()
+    });
+    showNotification("Order status updated!", "success");
+    loadOrders();
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    showNotification("Error updating order status", "error");
+  } finally {
+    hideLoader();
+  }
+}
+
+function sendOrderWhatsAppMessage(phone, orderId) {
+  const message = `Order #${orderId.substring(0, 8).toUpperCase()} has been updated. Thank you for booking with us!`;
+  const link = getWhatsAppLink(phone, message);
+  window.open(link, "_blank");
+}
+
+function viewOrderDetails(orderId) {
+  alert("Order ID: " + orderId + "\n\nFull details view can be implemented here");
+}
+
+async function deleteOrder(orderId) {
+  if (!confirm("Are you sure you want to delete this order?")) return;
+
+  try {
+    showLoader();
+    await db.collection(COLLECTIONS.orders || "orders").doc(orderId).delete();
+    showNotification("Order deleted successfully", "success");
+    loadOrders();
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    showNotification("Error deleting order", "error");
+  } finally {
+    hideLoader();
+  }
+}
+
+function exportOrdersToCSV() {
+  alert("Export to CSV feature can be implemented here");
+  // Can integrate with a library like papa-parse to export CSV
+}
+
 // Close modals on outside click
+
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("modal")) {
     e.target.classList.remove("active");
