@@ -156,11 +156,29 @@ async function manualSetupAdmin() {
 // ============================================
 function checkAuthStatus() {
   if (auth && typeof auth.onAuthStateChanged === "function") {
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
-        currentUser = user;
-        showDashboard();
-        loadAllData();
+        // Check if user is admin
+        try {
+          const adminDoc = await db.collection('admins').doc(user.email).get();
+
+          if (adminDoc.exists) {
+            // User is admin - show dashboard
+            currentUser = user;
+            console.log('✅ Admin verified:', user.email);
+            showDashboard();
+            loadAllData();
+          } else {
+            // User exists but is not admin - logout
+            console.warn('⚠️ User is not admin:', user.email);
+            await auth.signOut();
+            showLogin();
+            alert('❌ Access Denied!\n\nYou are not authorized as an admin.\n\nPlease login with admin credentials.');
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          showLogin();
+        }
       } else {
         showLogin();
       }

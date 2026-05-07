@@ -115,7 +115,7 @@ async function isUserAdmin() {
   if (!auth.currentUser) return false;
 
   try {
-    const adminDoc = await db.collection('admins').doc(auth.currentUser.uid).get();
+    const adminDoc = await db.collection('admins').doc(auth.currentUser.email).get();
     return adminDoc.exists;
   } catch (error) {
     console.error('Error checking admin status:', error);
@@ -180,9 +180,10 @@ async function updateUserProfile(userData) {
 /**
  * Update UI for logged in user
  */
-function updateUIForLoggedInUser() {
+async function updateUIForLoggedInUser() {
   const myAccountBtn = document.getElementById('myAccountBtn');
   const myOrdersBtn = document.getElementById('myOrdersBtn');
+  const adminBtn = document.getElementById('adminBtn');
 
   if (myAccountBtn) {
     myAccountBtn.style.display = 'flex';
@@ -191,6 +192,12 @@ function updateUIForLoggedInUser() {
 
   if (myOrdersBtn) {
     myOrdersBtn.style.display = 'flex';
+  }
+
+  // Show admin button if user is admin
+  if (adminBtn) {
+    const isAdmin = await isUserAdmin();
+    adminBtn.style.display = isAdmin ? 'flex' : 'none';
   }
 
   // Hide auth link if present
@@ -206,6 +213,7 @@ function updateUIForLoggedInUser() {
 function updateUIForLoggedOutUser() {
   const myAccountBtn = document.getElementById('myAccountBtn');
   const myOrdersBtn = document.getElementById('myOrdersBtn');
+  const adminBtn = document.getElementById('adminBtn');
 
   if (myAccountBtn) {
     myAccountBtn.style.display = 'none';
@@ -213,6 +221,10 @@ function updateUIForLoggedOutUser() {
 
   if (myOrdersBtn) {
     myOrdersBtn.style.display = 'none';
+  }
+
+  if (adminBtn) {
+    adminBtn.style.display = 'none';
   }
 
   // Show auth link
