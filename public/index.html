@@ -324,6 +324,39 @@
       }
     }
 
+    .size-btn {
+      padding: 0.75rem;
+      border: 2px solid var(--border-color);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .size-btn:hover:not(:disabled) {
+      border-color: var(--primary-green);
+      color: var(--primary-green);
+    }
+
+    .size-btn.selected {
+      background: var(--primary-green);
+      color: white;
+      border-color: var(--primary-green);
+    }
+
+    .size-btn.selected:hover {
+      background: var(--primary-dark-green);
+      border-color: var(--primary-dark-green);
+      box-shadow: 0 2px 8px rgba(29, 135, 68, 0.3);
+    }
+
+    .size-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     @media (max-width: 768px) {
       .products-grid {
         grid-template-columns: 1fr;
@@ -545,24 +578,31 @@
 
         if (sizes.length > 0) {
           sizesHTML = `
-            <div class="size-section">
-              <label>Select Size</label>
-              <div class="size-buttons">
+            <div class="size-section" style="margin-bottom: 2rem;">
+              <label style="display: block; font-weight: 600; margin-bottom: 1rem; color: var(--text-dark);">Select Size</label>
+              <div class="size-buttons" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem; margin-bottom: 1rem;">
                 ${sizes.map(size => `
-                  <button class="size-btn" onclick="selectSize('${size.size}', this)" ${size.stock === 0 ? 'disabled' : ''}>
+                  <button class="size-btn" onclick="selectSize('${size.size}', this)" style="padding: 0.75rem; border: 2px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; text-align: center;" ${size.stock === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
                     ${size.size} ${size.stock === 0 ? '(Out)' : ''}
                   </button>
                 `).join('')}
               </div>
-              <div class="size-note">
+              <div class="size-note" style="font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem;">
                 <i class="fas fa-info-circle"></i>
                 Only available sizes are shown.
               </div>
             </div>
           `;
+        } else {
+          sizesHTML = `
+            <div class="size-section" style="background: #f9f9f9; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; text-align: center;">
+              <p style="color: var(--text-secondary); margin: 0;">Sizes will be available soon. Please contact us via WhatsApp for more information.</p>
+            </div>
+          `;
         }
       } catch (error) {
         console.error('Error loading sizes:', error);
+        sizesHTML = '';
       }
 
       content.innerHTML = `
