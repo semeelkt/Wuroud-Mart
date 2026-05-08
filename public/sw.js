@@ -3,7 +3,7 @@
  * Enables off-line caching and installable app functionality
  */
 
-const CACHE_NAME = "wuroud-mart-v1";
+const CACHE_NAME = "wuroud-mart-v2";
 const urlsToCache = [
   "/",
   "/index.html",

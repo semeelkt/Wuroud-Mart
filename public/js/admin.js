@@ -377,9 +377,7 @@ async function loadProducts() {
 function createProductItem(product) {
   const item = document.createElement("div");
   item.className = "product-item";
-  const manageButton = product.category === "Footwear"
-    ? `<button class="btn btn-info btn-small" onclick="manageSizes('${product.id}')">Sizes</button>`
-    : "";
+  const manageButton = `<button class="btn btn-info btn-small" onclick="manageSizes('${product.id}')">Sizes</button>`;
 
   const offerBadge = product.isOfferProduct
     ? `<span style="background: #ff6b6b; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-right: 0.5rem;">🎁 OFFER</span>`
@@ -435,6 +433,7 @@ async function editProduct(productId) {
     document.getElementById("productFormTitle").textContent = "Edit Product";
     document.getElementById("productName").value = product.name;
     document.getElementById("productCategory").value = product.category;
+    document.getElementById("productCompany").value = product.company || "";
     document.getElementById("productPrice").value = product.price || "";
     document.getElementById("productStock").value = product.stock;
     document.getElementById("productDescription").value = product.description || "";
@@ -507,6 +506,7 @@ async function saveProduct() {
     const productData = {
       name: document.getElementById("productName").value,
       category: document.getElementById("productCategory").value,
+      company: document.getElementById("productCompany").value || "",
       price: parseFloat(document.getElementById("productPrice").value) || 0,
       stock: parseInt(document.getElementById("productStock").value),
       description: document.getElementById("productDescription").value
@@ -573,7 +573,7 @@ function closeProductForm() {
 
 function populateProductCategories() {
   const select = document.getElementById("productCategory");
-  if (!select.querySelector("option[value='Electronics']")) {
+  if (!select.querySelector("option[value='Gents']")) {
     PRODUCT_CATEGORIES.slice(1).forEach((cat) => {
       const option = document.createElement("option");
       option.value = cat;
@@ -894,13 +894,6 @@ async function manageSizes(productId) {
     showLoader();
     const productDoc = await db.collection(COLLECTIONS.products).doc(productId).get();
     const product = productDoc.data();
-
-    // Only allow for footwear category
-    if (product.category !== "Footwear") {
-      showNotification("Size management is only for Footwear products", "error");
-      hideLoader();
-      return;
-    }
 
     // Load or create size data
     const sizeDocRef = db.collection(COLLECTIONS.productSizes).doc(productId);

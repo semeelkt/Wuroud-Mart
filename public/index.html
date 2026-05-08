@@ -10,9 +10,14 @@
   <style>
     .main-container {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 0;
       min-height: calc(100vh - 120px);
+      transition: grid-template-columns 0.3s ease;
+    }
+
+    .main-container.split-view {
+      grid-template-columns: 1fr 1fr;
     }
 
     .products-list {
@@ -49,8 +54,12 @@
 
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(7, 1fr);
       gap: 1rem;
+    }
+
+    .main-container.split-view .products-grid {
+      grid-template-columns: repeat(3, 1fr);
     }
 
     .product-card-small {
@@ -60,6 +69,8 @@
       overflow: hidden;
       cursor: pointer;
       transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
     }
 
     .product-card-small:hover {
@@ -69,33 +80,39 @@
 
     .product-image-small {
       width: 100%;
-      height: 150px;
+      height: 180px;
       object-fit: cover;
       background: #f0f0f0;
     }
 
     .product-info-small {
-      padding: 1rem;
+      padding: 1.2rem;
       text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .product-name-small {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
       color: var(--text-dark);
+      line-height: 1.4;
     }
 
     .product-price-small {
-      font-size: 1rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--primary-green);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
     }
 
     .product-stock-small {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: var(--primary-green);
+      font-weight: 500;
     }
 
     .detail-image {
@@ -393,17 +410,17 @@
         <button class="category-btn active" onclick="filterByCategory('All')">
           <i class="fas fa-th-large"></i> All Categories
         </button>
-        <button class="category-btn" onclick="filterByCategory('Footwear')">
-          <i class="fas fa-shoe-prints"></i> Footwear
+        <button class="category-btn" onclick="filterByCategory('Gents')">
+          <i class="fas fa-user"></i> Gents
         </button>
-        <button class="category-btn" onclick="filterByCategory('Toys')">
-          <i class="fas fa-cube"></i> Toys
+        <button class="category-btn" onclick="filterByCategory('Ladies')">
+          <i class="fas fa-user"></i> Ladies
         </button>
-        <button class="category-btn" onclick="filterByCategory('Fancy')">
-          <i class="fas fa-sparkles"></i> Fancy
+        <button class="category-btn" onclick="filterByCategory('Girls')">
+          <i class="fas fa-child"></i> Girls
         </button>
-        <button class="category-btn" onclick="filterByCategory('Stationary')">
-          <i class="fas fa-pen"></i> Stationary
+        <button class="category-btn" onclick="filterByCategory('Boys')">
+          <i class="fas fa-child"></i> Boys
         </button>
       </div>
     </div>
@@ -488,15 +505,27 @@
       }
 
       grid.innerHTML = products.map(product => `
-        <div class="product-card-small" onclick="showProductDetails('${product.id}')">
-          <img src="${product.imageURL || 'placeholder.jpg'}" alt="${product.name}" class="product-image-small" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22150%22/></svg>'">
-          <div class="product-info-small">
-            <div class="product-name-small">${product.name}</div>
-            <div class="product-price-small">₹${product.price?.toLocaleString()}</div>
-            <div class="product-stock-small">${product.stock > 0 ? '✓ In Stock' : '✗ Out of Stock'}</div>
+        <div class="product-card-small" onclick="showProductDetails('${product.id}')" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: all 0.2s;">
+          <img src="${product.imageURL || 'placeholder.jpg'}" alt="${product.name}" class="product-image-small" style="width: 100%; height: 280px; object-fit: contain; background: #f0f0f0; padding: 10px;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22280%22/></svg>'">
+          <div class="product-info-small" style="padding: 1rem; text-align: left; flex: 1; display: flex; flex-direction: column; justify-content: flex-start;">
+            <div class="product-company-small" style="font-size: 0.75rem; font-weight: 600; color: #757575; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">${product.company || 'Brand'}</div>
+            <div class="product-name-small" style="font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; color: #212121; line-height: 1.3;">${product.name}</div>
+            <div class="product-price-small" style="font-size: 1.1rem; font-weight: 800; color: #1d8744;">₹${product.price?.toLocaleString() || 'N/A'}</div>
           </div>
         </div>
       `).join('');
+
+      // Add hover effects
+      document.querySelectorAll('.product-card-small').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+          this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+          this.style.transform = 'translateY(-2px)';
+        });
+        card.addEventListener('mouseleave', function() {
+          this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
+          this.style.transform = 'translateY(0)';
+        });
+      });
     }
 
     async function showProductDetails(productId) {
@@ -506,53 +535,58 @@
       selectedProduct = product;
       const details = document.getElementById('productDetails');
       const content = document.getElementById('detailsContent');
+      const container = document.querySelector('.main-container');
 
-      // Load sizes if footwear
+      // Load sizes if available
       let sizesHTML = '';
-      if (product.category === 'Footwear') {
-        try {
-          const sizeDoc = await db.collection('productSizes').doc(productId).get();
-          const sizes = sizeDoc.exists ? sizeDoc.data().sizes || [] : [];
+      try {
+        const sizeDoc = await db.collection('productSizes').doc(productId).get();
+        const sizes = sizeDoc.exists ? sizeDoc.data().sizes || [] : [];
 
-          if (sizes.length > 0) {
-            sizesHTML = `
-              <div class="size-section">
-                <label>Select Size</label>
-                <div class="size-buttons">
-                  ${sizes.map(size => `
-                    <button class="size-btn" onclick="selectSize('${size.size}', this)" ${size.stock === 0 ? 'disabled' : ''}>
-                      ${size.size} ${size.stock === 0 ? '(Out)' : ''}
-                    </button>
-                  `).join('')}
-                </div>
-                <div class="size-note">
-                  <i class="fas fa-info-circle"></i>
-                  Only available sizes are shown.
-                </div>
+        if (sizes.length > 0) {
+          sizesHTML = `
+            <div class="size-section">
+              <label>Select Size</label>
+              <div class="size-buttons">
+                ${sizes.map(size => `
+                  <button class="size-btn" onclick="selectSize('${size.size}', this)" ${size.stock === 0 ? 'disabled' : ''}>
+                    ${size.size} ${size.stock === 0 ? '(Out)' : ''}
+                  </button>
+                `).join('')}
               </div>
-            `;
-          }
-        } catch (error) {
-          console.error('Error loading sizes:', error);
+              <div class="size-note">
+                <i class="fas fa-info-circle"></i>
+                Only available sizes are shown.
+              </div>
+            </div>
+          `;
         }
+      } catch (error) {
+        console.error('Error loading sizes:', error);
       }
 
       content.innerHTML = `
-        <div class="detail-category">${product.category || 'Other'}</div>
-        <h1 class="detail-name">${product.name}</h1>
-        <div class="detail-price">₹${product.price?.toLocaleString()}</div>
-        <p class="detail-description">${product.description || 'High-quality product'}</p>
-
-        <div class="detail-features">
-          <div class="feature">
-            <i class="fas fa-check-circle"></i>
-            <span>100% Original</span>
-          </div>
-          <div class="feature">
-            <i class="fas fa-undo"></i>
-            <span>Easy Returns</span>
+        <div style="display: flex; gap: 2rem; margin-bottom: 2rem; align-items: flex-start;">
+          <img src="${getImageUrl(product.imageURL)}" alt="${product.name}" style="width: 180px; height: 220px; object-fit: contain; background: #f9f9f9; border-radius: 8px; flex-shrink: 0;">
+          <div style="flex: 1;">
+            <div class="detail-category">${product.category || 'Other'}</div>
+            <h1 class="detail-name" style="margin-bottom: 0.5rem;">${product.name}</h1>
+            ${product.company ? `<div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; text-transform: uppercase; font-weight: 600;">By ${product.company}</div>` : ''}
+            <div class="detail-price" style="margin-bottom: 1rem;">₹${product.price?.toLocaleString()}</div>
+            <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+              <div class="feature">
+                <i class="fas fa-check-circle"></i>
+                <span>100% Original</span>
+              </div>
+              <div class="feature">
+                <i class="fas fa-undo"></i>
+                <span>Easy Returns</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        <p class="detail-description">${product.description || 'High-quality product'}</p>
 
         ${sizesHTML}
 
@@ -605,6 +639,7 @@
       document.getElementById('pickupDate').min = tomorrow.toISOString().split('T')[0];
 
       details.classList.add('active');
+      container.classList.add('split-view');
       document.querySelector('.back-button').classList.add('show');
     }
 
@@ -701,6 +736,7 @@
 
     function closeProductDetails() {
       document.getElementById('productDetails').classList.remove('active');
+      document.querySelector('.main-container').classList.remove('split-view');
       document.querySelector('.back-button').classList.remove('show');
       selectedProduct = null;
     }
