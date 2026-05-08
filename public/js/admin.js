@@ -312,8 +312,11 @@ function switchTab(tabName) {
     tabElement.classList.add("active");
   }
 
-  // Mark nav button as active
-  event.target.classList.add("active");
+  // Mark nav button as active - find button by data-tab attribute
+  const navBtn = document.querySelector(`[data-tab="${tabName}"]`);
+  if (navBtn) {
+    navBtn.classList.add("active");
+  }
 
   // Load tab data
   if (tabName === "products") loadProducts();
@@ -334,6 +337,8 @@ async function loadProducts() {
       return;
     }
 
+    const searchFilter = document.getElementById("productSearchName")?.value.toLowerCase() || "";
+
     const snapshot = await db.collection(COLLECTIONS.products).get();
     if (snapshot.empty) {
       container.innerHTML = "<p style='text-align: center;'>No products yet</p>";
@@ -341,11 +346,28 @@ async function loadProducts() {
     }
 
     container.innerHTML = "";
+    let filteredCount = 0;
+
     snapshot.forEach((doc) => {
       const product = { id: doc.id, ...doc.data() };
+
+      // Apply search filter
+      if (searchFilter) {
+        const matchesName = product.name.toLowerCase().includes(searchFilter);
+        const matchesCode = product.productCode && product.productCode.toLowerCase().includes(searchFilter);
+        if (!matchesName && !matchesCode) {
+          return;
+        }
+      }
+
+      filteredCount++;
       const item = createProductItem(product);
       container.appendChild(item);
     });
+
+    if (filteredCount === 0) {
+      container.innerHTML = "<p style='text-align: center;'>No products match your search</p>";
+    }
   } catch (error) {
     console.error("Error loading products:", error);
     container.innerHTML = "<p style='text-align: center; color: red;'>Error loading products</p>";
@@ -367,11 +389,16 @@ function createProductItem(product) {
     ? `<p><strong>Price:</strong> <span style="text-decoration: line-through; color: #999;">~${formatCurrency(product.price)}</span> → <span style="color: #d4a574; font-weight: bold;">${formatCurrency(product.offerPrice)}</span></p>`
     : `<p><strong>Price:</strong> ${formatCurrency(product.price)}</p>`;
 
+  const productCodeDisplay = product.productCode
+    ? `<p style="background: #e8f5e9; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; margin: 0.5rem 0;"><strong>Code:</strong> <code>${product.productCode}</code></p>`
+    : "";
+
   item.innerHTML = `
     <img src="${getImageUrl(product.imageURL)}" alt="${product.name}" class="product-item-image" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
     <div class="product-item-info">
       <h3>${offerBadge}${product.name}</h3>
       <p><strong>Category:</strong> ${product.category}</p>
+      ${productCodeDisplay}
       ${priceDisplay}
       <p><strong>Stock:</strong> ${product.stock}</p>
       <p><strong>Description:</strong> ${(product.description || "No description").substring(0, 100)}...</p>
@@ -498,12 +525,25 @@ async function saveProduct() {
       productData.offerPrice = parseFloat(offerPrice);
     }
 
+    // Generate unique product code if this is a new product
+    if (!editingProductId) {
+      productData.productCode = generateUniqueProductCode();
+      console.log("Generated product code:", productData.productCode);
+    }
+
     await saveProductToFirestore(productData);
   } catch (error) {
     console.error("Error saving product:", error);
     showNotification("Error saving product: " + error.message, "error");
     hideLoader();
   }
+}
+
+// Generate unique product code
+function generateUniqueProductCode() {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+  return `PRD-${timestamp}-${random}`;
 }
 
 async function saveProductToFirestore(productData) {
@@ -1019,6 +1059,7 @@ async function loadOrders() {
     // Apply filters
     const statusFilter = document.getElementById("orderStatusFilter").value;
     const phoneFilter = document.getElementById("orderSearchPhone").value;
+    const productFilter = document.getElementById("orderSearchProduct").value.toLowerCase();
 
     if (statusFilter) {
       query = query.where("status", "==", statusFilter);
@@ -1042,13 +1083,24 @@ async function loadOrders() {
         return;
       }
 
+      // Apply product name/code filter
+      if (productFilter) {
+        const matchesProduct = order.items.some(item =>
+          item.name.toLowerCase().includes(productFilter) ||
+          (item.productCode && item.productCode.toLowerCase().includes(productFilter))
+        );
+        if (!matchesProduct) {
+          return;
+        }
+      }
+
       filteredCount++;
       const item = createOrderItem(order);
       container.appendChild(item);
     });
 
     if (filteredCount === 0) {
-      container.innerHTML = "<p style='text-align: center;'>No orders match your filters</p>";
+      container.innerHTML = "<p style='text-align: center;'>No orders match your search</p>";
     }
   } catch (error) {
     console.error("Error loading orders:", error);
@@ -1074,7 +1126,10 @@ function createOrderItem(order) {
   };
 
   const itemsList = order.items.map(item => `
-    <li>${item.name} x${item.quantity}${item.selectedSize ? ` (Size: ${item.selectedSize})` : ''} - ₹${((item.offerPrice || item.price) * item.quantity).toLocaleString()}</li>
+    <li>
+      ${item.name} x${item.quantity}${item.selectedSize ? ` (Size: ${item.selectedSize})` : ''} - ₹${((item.offerPrice || item.price) * item.quantity).toLocaleString()}
+      ${item.productCode ? `<br><small style="color: #666; font-size: 0.85rem;">Code: <code>${item.productCode}</code></small>` : ''}
+    </li>
   `).join('');
 
   item.innerHTML = `
@@ -1214,7 +1269,7 @@ ${order.items.map(item => `${item.name} × ${item.quantity}${item.selectedSize ?
 TOTAL: ₹${order.totalAmount?.toLocaleString() || 0}
 
 ${order.specialRequests || order.additionalNotes ? `NOTES: ${order.specialRequests || order.additionalNotes}` : ''}
-      });
+      `);
     }
   }).catch(error => {
     console.error('Error loading order details:', error);

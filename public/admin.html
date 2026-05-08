@@ -65,6 +65,11 @@
             <button class="btn btn-primary" onclick="openAddProductForm()"><i class="fas fa-plus"></i> Add Product</button>
           </div>
 
+          <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+            <input type="text" id="productSearchName" placeholder="Search by product name or code..." style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px;">
+            <button class="btn btn-secondary btn-small" onclick="loadProducts()">Search</button>
+          </div>
+
           <div class="products-list" id="productsList">
             <div style="text-align: center; padding: 2rem;">Loading products...</div>
           </div>
@@ -77,7 +82,7 @@
             <button class="btn btn-info btn-small" onclick="exportOrdersToCSV()"><i class="fas fa-download"></i> Export Orders</button>
           </div>
 
-          <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+          <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
             <select id="orderStatusFilter" style="padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px;">
               <option value="">All Orders</option>
               <option value="pending">Pending</option>
@@ -86,8 +91,9 @@
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
             </select>
-            <input type="text" id="orderSearchPhone" placeholder="Search by phone number..." style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px;">
-            <button class="btn btn-secondary btn-small" onclick="loadOrders()">Filter</button>
+            <input type="text" id="orderSearchPhone" placeholder="Search by phone number..." style="flex: 1; min-width: 200px; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px;">
+            <input type="text" id="orderSearchProduct" placeholder="Search by product name or code..." style="flex: 1; min-width: 200px; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px;">
+            <button class="btn btn-secondary btn-small" onclick="loadOrders()">Search</button>
           </div>
 
           <div class="orders-list" id="ordersList">

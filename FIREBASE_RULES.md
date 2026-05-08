@@ -18,16 +18,32 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
     
+    // Product Sizes: Authenticated read/write only
+    match /productSizes/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
     // Offers: Public read, authenticated write
     match /offers/{document=**} {
       allow read;
       allow write: if request.auth != null;
     }
     
+    // Orders: Public create (pre-orders), authenticated read/write
+    match /orders/{document=**} {
+      allow read, write: if request.auth != null;
+      allow create; // Allow public users to submit pre-orders
+    }
+    
     // Inquiries: Authenticated read/write, public create (for forms)
     match /inquiries/{document=**} {
       allow read, write: if request.auth != null;
       allow create; // Allow public to submit inquiries via forms
+    }
+
+    // Admins collection: Read/write for authenticated users only
+    match /admins/{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }

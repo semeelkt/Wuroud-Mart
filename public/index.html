@@ -632,19 +632,71 @@
         return;
       }
 
-      // Add to cart with details
-      addToCart({
+      // Save pre-order to admin panel (Firebase orders collection)
+      savePreorderToAdmin({
         id: productId,
         name: selectedProduct.name,
         price: selectedProduct.price,
         imageURL: selectedProduct.imageURL,
         category: selectedProduct.category,
-        selectedSize: selectedSize
-      }, 1);
+        selectedSize: selectedSize,
+        productCode: selectedProduct.productCode || 'N/A',
+        customerName: name,
+        customerPhone: phone,
+        preferredDeliveryDate: date,
+        preferredPickupTime: time,
+        additionalNotes: notes
+      });
+    }
 
-      // Show success
-      showNotification('Product added to cart! Continue shopping or proceed to checkout.', 'success');
-      closeProductDetails();
+    async function savePreorderToAdmin(preorderData) {
+      try {
+        showLoader();
+
+        // Prepare order object for admin panel
+        const orderData = {
+          customer: {
+            name: preorderData.customerName,
+            phone: preorderData.customerPhone,
+            email: currentUserData?.email || 'Not provided',
+            address: 'Will be provided on delivery'
+          },
+          items: [{
+            id: preorderData.id,
+            name: preorderData.name,
+            price: preorderData.price,
+            imageURL: preorderData.imageURL,
+            category: preorderData.category,
+            selectedSize: preorderData.selectedSize,
+            quantity: 1,
+            productCode: preorderData.productCode || 'N/A'
+          }],
+          totalAmount: preorderData.price,
+          status: 'pending',
+          createdAt: new Date(),
+          specialRequests: preorderData.additionalNotes,
+          preferredDeliveryDate: preorderData.preferredDeliveryDate,
+          preferredPickupTime: preorderData.preferredPickupTime,
+          userId: getCurrentUserId() || 'guest'
+        };
+
+        // Save to Firebase orders collection
+        const docRef = await db.collection('orders').add(orderData);
+
+        hideLoader();
+        showNotification('✅ Pre-order submitted successfully! Order ID: ' + docRef.id.substring(0, 8).toUpperCase(), 'success');
+        closeProductDetails();
+
+        // Show admin panel link
+        setTimeout(() => {
+          showNotification('📋 Pre-order visible in admin panel', 'success');
+        }, 1500);
+
+      } catch (error) {
+        hideLoader();
+        console.error('Error saving pre-order:', error);
+        showNotification('Error submitting pre-order: ' + error.message, 'error');
+      }
     }
 
     function closeProductDetails() {

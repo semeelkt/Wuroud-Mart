@@ -18,7 +18,7 @@ function initAuthListeners() {
         email: user.email,
         displayName: user.displayName || user.email.split('@')[0]
       };
-      updateUIForLoggedInUser();
+      await updateUIForLoggedInUser();
     } else {
       currentUserData = null;
       updateUIForLoggedOutUser();
@@ -196,6 +196,8 @@ async function updateUIForLoggedInUser() {
 
   // Show admin button if user is admin
   if (adminBtn) {
+    // Ensure admin account exists for known admin email
+    await ensureAdminAccountExists(auth.currentUser.email);
     const isAdmin = await isUserAdmin();
     adminBtn.style.display = isAdmin ? 'flex' : 'none';
   }
@@ -204,6 +206,40 @@ async function updateUIForLoggedInUser() {
   const authLink = document.getElementById('authLink');
   if (authLink) {
     authLink.style.display = 'none';
+  }
+}
+
+/**
+ * Ensure admin account exists in Firestore for known admin email
+ */
+async function ensureAdminAccountExists(email) {
+  const ADMIN_EMAIL = "mrflux3602@gmail.com";
+
+  if (email === ADMIN_EMAIL) {
+    try {
+      // Check if db is available
+      if (!db) {
+        console.warn('Firebase Firestore not initialized yet');
+        return;
+      }
+
+      const adminDoc = await db.collection('admins').doc(ADMIN_EMAIL).get();
+
+      if (!adminDoc.exists) {
+        // Create admin entry if it doesn't exist
+        await db.collection('admins').doc(ADMIN_EMAIL).set({
+          email: ADMIN_EMAIL,
+          uid: auth.currentUser.uid,
+          createdAt: new Date(),
+          role: 'admin'
+        });
+        console.log('✅ Admin account auto-registered for', ADMIN_EMAIL);
+      } else {
+        console.log('✅ Admin account already exists for', ADMIN_EMAIL);
+      }
+    } catch (error) {
+      console.error('Error ensuring admin account exists:', error);
+    }
   }
 }
 
